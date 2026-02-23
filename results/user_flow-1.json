@@ -1,0 +1,12 @@
+{
+    "start_url": "https://www.amazon.com/",
+    "flows": [],
+    "nodes": [
+        {
+            "id": "2e1cfa82b035c26cbbbdae632cea070514eb8b773f616aaeaf668e2f0be8f10d",
+            "url": "https://www.amazon.com/",
+            "title": ""
+        }
+    ],
+    "edges": []
+}

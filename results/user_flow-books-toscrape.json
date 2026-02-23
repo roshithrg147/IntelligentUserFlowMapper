@@ -1,0 +1,283 @@
+{
+    "start_url": "http://books.toscrape.com/",
+    "flows": [
+        {
+            "name": "Flow 1",
+            "steps": [
+                "All products | Books to Scrape - Sandbox",
+                "Add a comment | Books to Scrape - Sandbox"
+            ]
+        },
+        {
+            "name": "Flow 2",
+            "steps": [
+                "All products | Books to Scrape - Sandbox",
+                "Travel | Books to Scrape - Sandbox"
+            ]
+        },
+        {
+            "name": "Flow 3",
+            "steps": [
+                "All products | Books to Scrape - Sandbox",
+                "Mystery | Books to Scrape - Sandbox"
+            ]
+        },
+        {
+            "name": "Flow 4",
+            "steps": [
+                "All products | Books to Scrape - Sandbox",
+                "Sequential Art | Books to Scrape - Sandbox"
+            ]
+        },
+        {
+            "name": "Flow 5",
+            "steps": [
+                "All products | Books to Scrape - Sandbox",
+                "Classics | Books to Scrape - Sandbox"
+            ]
+        },
+        {
+            "name": "Flow 6",
+            "steps": [
+                "All products | Books to Scrape - Sandbox",
+                "Historical Fiction | Books to Scrape - Sandbox"
+            ]
+        },
+        {
+            "name": "Flow 7",
+            "steps": [
+                "All products | Books to Scrape - Sandbox",
+                "Philosophy | Books to Scrape - Sandbox"
+            ]
+        },
+        {
+            "name": "Flow 8",
+            "steps": [
+                "All products | Books to Scrape - Sandbox",
+                "Romance | Books to Scrape - Sandbox"
+            ]
+        },
+        {
+            "name": "Flow 9",
+            "steps": [
+                "All products | Books to Scrape - Sandbox",
+                "Fiction | Books to Scrape - Sandbox"
+            ]
+        },
+        {
+            "name": "Flow 10",
+            "steps": [
+                "All products | Books to Scrape - Sandbox",
+                "Womens Fiction | Books to Scrape - Sandbox"
+            ]
+        }
+    ],
+    "nodes": [
+        {
+            "id": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "url": "http://books.toscrape.com/",
+            "title": "All products | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "9cc3e3fbb5059ea1c8ea1da3ce34a9060cc7b50ab5b87f1c16bc2329d148f073",
+            "url": "http://books.toscrape.com/catalogue/category/books/travel_2/index.html",
+            "title": "Travel | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "e9016055984b1861e1bdd887c47ed76f906c83696d45eb5a7283989383a08205",
+            "url": "http://books.toscrape.com/catalogue/category/books/mystery_3/index.html",
+            "title": "Mystery | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "cc0559eeea3ea84feb8ccbb6f938b9a2da76b00307b33e5d36c95c9ef8415617",
+            "url": "http://books.toscrape.com/catalogue/category/books/sequential-art_5/index.html",
+            "title": "Sequential Art | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "16b433e6c7a2346cdeb6aba2bd9ff6d61d392a661a506ddfc998f2542a4a15b9",
+            "url": "http://books.toscrape.com/catalogue/category/books/classics_6/index.html",
+            "title": "Classics | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "c596c9abc3fbc7727dae35854fdf3128452f467a985c79e5ac1d77bc2a9b3489",
+            "url": "http://books.toscrape.com/catalogue/category/books/historical-fiction_4/index.html",
+            "title": "Historical Fiction | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "f4953249156b180a1a9ca963e792234db97b941c865a9b4bd0984acaf14ad6f5",
+            "url": "http://books.toscrape.com/catalogue/category/books/philosophy_7/index.html",
+            "title": "Philosophy | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "9419618e8e0d432a247023ced270c1ed82a388143eaa66a8004aeac6a614ff31",
+            "url": "http://books.toscrape.com/catalogue/category/books/romance_8/index.html",
+            "title": "Romance | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "8a896c1bfa55eab517ae95331f1ed64549aab355d3bf421d38353496795f1d31",
+            "url": "http://books.toscrape.com/catalogue/category/books/fiction_10/index.html",
+            "title": "Fiction | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "e7d531f142df1c2ccaf4faff1b1873e59573cede0722ef1d5520c014486611c6",
+            "url": "http://books.toscrape.com/catalogue/category/books/womens-fiction_9/index.html",
+            "title": "Womens Fiction | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "68c9942b8a49ae1de5b7be3fffc4cfb984c6b5255eaab5cb74afc4d7844c245d",
+            "url": "http://books.toscrape.com/catalogue/category/books/childrens_11/index.html",
+            "title": "Childrens | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "15ca2a7e4eb4735e893f4c7d3a66fc637e378ff4dd6d3941e81466a52655e798",
+            "url": "http://books.toscrape.com/catalogue/category/books/religion_12/index.html",
+            "title": "Religion | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "d8334ed09486e48d733ec6b0d310ae67f31f167b3ab2526420b9dcb8b0d9fa80",
+            "url": "http://books.toscrape.com/catalogue/category/books/nonfiction_13/index.html",
+            "title": "Nonfiction | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "6afe256442c5aba2d81cea62be6faa379b77c8fbcf9eca92dfd8a3afb466358f",
+            "url": "http://books.toscrape.com/catalogue/category/books/default_15/index.html",
+            "title": "Default | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "0a7cd9979b82fa579126161e4b5464f357f36d3d2e9ab71149c743a670b9d200",
+            "url": "http://books.toscrape.com/catalogue/category/books/science-fiction_16/index.html",
+            "title": "Science Fiction | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "73c68f4ab4c8ae2eb1c55366a7c246947b4dac6088d897ab5eb3e792ae678491",
+            "url": "http://books.toscrape.com/catalogue/category/books/music_14/index.html",
+            "title": "Music | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "57511b5428813218e27d00f5a9b908ffea19cadbe8057a305d49629b74df41dc",
+            "url": "http://books.toscrape.com/catalogue/category/books/add-a-comment_18/index.html",
+            "title": "Add a comment | Books to Scrape - Sandbox"
+        },
+        {
+            "id": "781f700c6fe0f62249746731436b18731678ec7682dc525edf7ccf7c90a83b0b",
+            "url": "http://books.toscrape.com/catalogue/category/books/sports-and-games_17/index.html",
+            "title": "Sports and Games | Books to Scrape - Sandbox"
+        }
+    ],
+    "edges": [
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "label": "Books to Scrape",
+            "context": "nav"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "label": "Books",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "9cc3e3fbb5059ea1c8ea1da3ce34a9060cc7b50ab5b87f1c16bc2329d148f073",
+            "label": "Travel",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "e9016055984b1861e1bdd887c47ed76f906c83696d45eb5a7283989383a08205",
+            "label": "Mystery",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "cc0559eeea3ea84feb8ccbb6f938b9a2da76b00307b33e5d36c95c9ef8415617",
+            "label": "Sequential Art",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "16b433e6c7a2346cdeb6aba2bd9ff6d61d392a661a506ddfc998f2542a4a15b9",
+            "label": "Classics",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "c596c9abc3fbc7727dae35854fdf3128452f467a985c79e5ac1d77bc2a9b3489",
+            "label": "Historical Fiction",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "f4953249156b180a1a9ca963e792234db97b941c865a9b4bd0984acaf14ad6f5",
+            "label": "Philosophy",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "9419618e8e0d432a247023ced270c1ed82a388143eaa66a8004aeac6a614ff31",
+            "label": "Romance",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "8a896c1bfa55eab517ae95331f1ed64549aab355d3bf421d38353496795f1d31",
+            "label": "Fiction",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "e7d531f142df1c2ccaf4faff1b1873e59573cede0722ef1d5520c014486611c6",
+            "label": "Womens Fiction",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "68c9942b8a49ae1de5b7be3fffc4cfb984c6b5255eaab5cb74afc4d7844c245d",
+            "label": "Childrens",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "15ca2a7e4eb4735e893f4c7d3a66fc637e378ff4dd6d3941e81466a52655e798",
+            "label": "Religion",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "d8334ed09486e48d733ec6b0d310ae67f31f167b3ab2526420b9dcb8b0d9fa80",
+            "label": "Nonfiction",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "6afe256442c5aba2d81cea62be6faa379b77c8fbcf9eca92dfd8a3afb466358f",
+            "label": "Default",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "0a7cd9979b82fa579126161e4b5464f357f36d3d2e9ab71149c743a670b9d200",
+            "label": "Science Fiction",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "73c68f4ab4c8ae2eb1c55366a7c246947b4dac6088d897ab5eb3e792ae678491",
+            "label": "Music",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "57511b5428813218e27d00f5a9b908ffea19cadbe8057a305d49629b74df41dc",
+            "label": "Add a comment",
+            "context": "content"
+        },
+        {
+            "source": "043d181724466c1e0848cbf316a40c68efb354ed9836d9a4c4e2068e7c38972c",
+            "target": "781f700c6fe0f62249746731436b18731678ec7682dc525edf7ccf7c90a83b0b",
+            "label": "Sports and Games",
+            "context": "content"
+        }
+    ]
+}

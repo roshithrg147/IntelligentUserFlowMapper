@@ -1,0 +1,261 @@
+{
+    "start_url": "https://foreai.co",
+    "flows": [
+        {
+            "name": "Flow 1",
+            "steps": [
+                "fore ai | Your Autonomous QA Agent",
+                "Test Management \u2014 fore ai"
+            ]
+        },
+        {
+            "name": "Flow 2",
+            "steps": [
+                "fore ai | Your Autonomous QA Agent",
+                "Web app testing \u2014 fore ai"
+            ]
+        },
+        {
+            "name": "Flow 3",
+            "steps": [
+                "fore ai | Your Autonomous QA Agent",
+                "Mobile \u2014 fore ai"
+            ]
+        },
+        {
+            "name": "Flow 4",
+            "steps": [
+                "fore ai | Your Autonomous QA Agent",
+                "Travel \u2014 fore ai"
+            ]
+        },
+        {
+            "name": "Flow 5",
+            "steps": [
+                "fore ai | Your Autonomous QA Agent",
+                "Finance \u2014 fore ai"
+            ]
+        },
+        {
+            "name": "Flow 6",
+            "steps": [
+                "fore ai | Your Autonomous QA Agent",
+                "Insurance \u2014 fore ai"
+            ]
+        },
+        {
+            "name": "Flow 7",
+            "steps": [
+                "fore ai | Your Autonomous QA Agent",
+                "Media \u2014 fore ai"
+            ]
+        },
+        {
+            "name": "Flow 8",
+            "steps": [
+                "fore ai | Your Autonomous QA Agent",
+                "Retail \u2014 fore ai"
+            ]
+        },
+        {
+            "name": "Flow 9",
+            "steps": [
+                "fore ai | Your Autonomous QA Agent",
+                "Technology \u2014 fore ai"
+            ]
+        },
+        {
+            "name": "Flow 10",
+            "steps": [
+                "fore ai | Your Autonomous QA Agent",
+                "SaaS & B2B Apps \u2014 fore ai"
+            ]
+        }
+    ],
+    "nodes": [
+        {
+            "id": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "url": "https://foreai.co",
+            "title": "fore ai | Your Autonomous QA Agent"
+        },
+        {
+            "id": "826bf2babe9c06884afa5da0f42c256d80c465081821f80f928e0b8b57c0639e",
+            "url": "https://foreai.co/products/test-management",
+            "title": "Test Management \u2014 fore ai"
+        },
+        {
+            "id": "d1b29521ebf4aef4b796976edd431d23aac4990911d2607c91b1906a413cdc51",
+            "url": "https://foreai.co/products/web",
+            "title": "Web app testing \u2014 fore ai"
+        },
+        {
+            "id": "61eced53d82257555958f12fb073e8a2f29d9a6b5050cc601ce1936d6c700343",
+            "url": "https://foreai.co/products/mobile",
+            "title": "Mobile \u2014 fore ai"
+        },
+        {
+            "id": "7defd03ec039bf105c07497733badaeb80e528a5f1a02e6f7283ae3883eb5665",
+            "url": "https://foreai.co/products/integrations",
+            "title": "Integrations \u2014 fore ai"
+        },
+        {
+            "id": "5ce404f7fa4c64b9ff20e0e6d658ed6521ebe496019066d18a96c65f34a17c8d",
+            "url": "https://foreai.co/customers/travel",
+            "title": "Travel \u2014 fore ai"
+        },
+        {
+            "id": "c5989bf5abdfb86014a806c5b3b0cbcbe8d7203f5143ac469ce4cf2f11383ab9",
+            "url": "https://foreai.co/customers/finance",
+            "title": "Finance \u2014 fore ai"
+        },
+        {
+            "id": "3b3e05af7343fa62d252abdb72f6040f8c1f8446f14272cb89f64d204ef8f919",
+            "url": "https://foreai.co/customers/insurance",
+            "title": "Insurance \u2014 fore ai"
+        },
+        {
+            "id": "0700e3d72707a9d935d6bdcc495147b05862345f78b095d9b1d81e06395419e8",
+            "url": "https://foreai.co/customers/media",
+            "title": "Media \u2014 fore ai"
+        },
+        {
+            "id": "cccde7a23e391198e767974f6eefc5c6d6709e36cca56dad945372fd7d9aad89",
+            "url": "https://foreai.co/customers/retail",
+            "title": "Retail \u2014 fore ai"
+        },
+        {
+            "id": "ad6910e189af4f11f3e68c259218311232ca4f9cbb90ff78fe347d364022b2fc",
+            "url": "https://foreai.co/customers/technology",
+            "title": "Technology \u2014 fore ai"
+        },
+        {
+            "id": "fba5d9325c55c8f2ccd6320b3b961965dc75406ebbcbbbb9a20ca749930b9b7b",
+            "url": "https://foreai.co/customers/saas",
+            "title": "SaaS & B2B Apps \u2014 fore ai"
+        },
+        {
+            "id": "ec998a209045a8ad41aca60e3dd75ccfad4a6a8ba59089d692d9f2034d2efbf3",
+            "url": "https://foreai.co/product",
+            "title": "Error 404 \u2014 fore ai"
+        },
+        {
+            "id": "26813d41a97a2498edc123c178d679edabb9ecc83305e74119674676dac74ade",
+            "url": "https://foreai.co/about",
+            "title": "About Us"
+        },
+        {
+            "id": "3c399fc3515122d5c8ff33756bbb9e6109d56e0337ee554e3364d220042e1b44",
+            "url": "https://foreai.co/careers",
+            "title": "Careers"
+        },
+        {
+            "id": "c0cc90a180939ac8f782255e710d5ac89bb31e5a31cf5d28d156e89d0562d3eb",
+            "url": "https://foreai.co/terms",
+            "title": "Terms of Service \u2014 fore ai"
+        }
+    ],
+    "edges": [
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "label": "fore",
+            "context": "nav"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "826bf2babe9c06884afa5da0f42c256d80c465081821f80f928e0b8b57c0639e",
+            "label": "Test Management",
+            "context": "nav"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "d1b29521ebf4aef4b796976edd431d23aac4990911d2607c91b1906a413cdc51",
+            "label": "Web",
+            "context": "nav"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "61eced53d82257555958f12fb073e8a2f29d9a6b5050cc601ce1936d6c700343",
+            "label": "Mobile",
+            "context": "nav"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "7defd03ec039bf105c07497733badaeb80e528a5f1a02e6f7283ae3883eb5665",
+            "label": "Integrations",
+            "context": "nav"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "5ce404f7fa4c64b9ff20e0e6d658ed6521ebe496019066d18a96c65f34a17c8d",
+            "label": "Travel",
+            "context": "nav"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "c5989bf5abdfb86014a806c5b3b0cbcbe8d7203f5143ac469ce4cf2f11383ab9",
+            "label": "Finance",
+            "context": "nav"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "3b3e05af7343fa62d252abdb72f6040f8c1f8446f14272cb89f64d204ef8f919",
+            "label": "Insurance",
+            "context": "nav"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "0700e3d72707a9d935d6bdcc495147b05862345f78b095d9b1d81e06395419e8",
+            "label": "Media",
+            "context": "nav"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "cccde7a23e391198e767974f6eefc5c6d6709e36cca56dad945372fd7d9aad89",
+            "label": "Retail",
+            "context": "nav"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "ad6910e189af4f11f3e68c259218311232ca4f9cbb90ff78fe347d364022b2fc",
+            "label": "Technology",
+            "context": "nav"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "fba5d9325c55c8f2ccd6320b3b961965dc75406ebbcbbbb9a20ca749930b9b7b",
+            "label": "SaaS Apps",
+            "context": "nav"
+        },
+        {
+            "source": "7defd03ec039bf105c07497733badaeb80e528a5f1a02e6f7283ae3883eb5665",
+            "target": "ec998a209045a8ad41aca60e3dd75ccfad4a6a8ba59089d692d9f2034d2efbf3",
+            "label": "Explore the product",
+            "context": "content"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "26813d41a97a2498edc123c178d679edabb9ecc83305e74119674676dac74ade",
+            "label": "About Us",
+            "context": "nav"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "3c399fc3515122d5c8ff33756bbb9e6109d56e0337ee554e3364d220042e1b44",
+            "label": "Careers",
+            "context": "nav"
+        },
+        {
+            "source": "7defd03ec039bf105c07497733badaeb80e528a5f1a02e6f7283ae3883eb5665",
+            "target": "ec998a209045a8ad41aca60e3dd75ccfad4a6a8ba59089d692d9f2034d2efbf3",
+            "label": "Request Demo",
+            "context": "content"
+        },
+        {
+            "source": "3fdbdf5c7cce48c225a9ff6c1c634a966a11669cc6e70b907b7a2eea882a48b7",
+            "target": "c0cc90a180939ac8f782255e710d5ac89bb31e5a31cf5d28d156e89d0562d3eb",
+            "label": "Terms of Service",
+            "context": "nav"
+        }
+    ]
+}

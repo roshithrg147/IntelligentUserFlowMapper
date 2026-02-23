@@ -1,0 +1,262 @@
+{
+    "start_url": "https://cadmaxx.com",
+    "flows": [
+        {
+            "name": "Flow 1",
+            "steps": [
+                "Cadmaxx",
+                "Page not found - Cadmaxx"
+            ]
+        },
+        {
+            "name": "Flow 2",
+            "steps": [
+                "Cadmaxx",
+                "About Cadmaxx - Cadmaxx"
+            ]
+        },
+        {
+            "name": "Flow 3",
+            "steps": [
+                "Cadmaxx",
+                "Digital Engineering & IT Services - Cadmaxx"
+            ]
+        },
+        {
+            "name": "Flow 4",
+            "steps": [
+                "Cadmaxx",
+                "System Integration - Cadmaxx"
+            ]
+        },
+        {
+            "name": "Flow 5",
+            "steps": [
+                "Cadmaxx",
+                "Defence & PSU - Cadmaxx"
+            ]
+        },
+        {
+            "name": "Flow 6",
+            "steps": [
+                "Cadmaxx",
+                "Companies - Cadmaxx"
+            ]
+        },
+        {
+            "name": "Flow 7",
+            "steps": [
+                "Cadmaxx",
+                "Contact Us - Cadmaxx"
+            ]
+        },
+        {
+            "name": "Flow 8",
+            "steps": [
+                "Cadmaxx",
+                "Engineering and R&D - Cadmaxx",
+                "About Cadmaxx - Cadmaxx"
+            ]
+        },
+        {
+            "name": "Flow 9",
+            "steps": [
+                "Cadmaxx",
+                "Industrial Automation - Cadmaxx",
+                "About Cadmaxx - Cadmaxx"
+            ]
+        },
+        {
+            "name": "Flow 10",
+            "steps": [
+                "Cadmaxx",
+                "Our Leadership - Cadmaxx",
+                "About Cadmaxx - Cadmaxx"
+            ]
+        }
+    ],
+    "nodes": [
+        {
+            "id": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "url": "https://cadmaxx.com",
+            "title": "Cadmaxx"
+        },
+        {
+            "id": "4a3d0b9523fd5158ca0efeca63e4ad31adbdbfa228a0fb5bd0f2a7ff38053226",
+            "url": "https://cadmaxx.com/about-cadmaxx/",
+            "title": "About Cadmaxx - Cadmaxx"
+        },
+        {
+            "id": "362057311356c4fdc5f981273900f2038e3fe9fb8f3c6a31ac28258aa7b2158d",
+            "url": "https://cadmaxx.com/our-leadership/",
+            "title": "Our Leadership - Cadmaxx"
+        },
+        {
+            "id": "8974e2c26bda1a243f239c95eb30687156a671632559f1eaccd8504b827ca217",
+            "url": "https://cadmaxx.com/engineering-and-rd/",
+            "title": "Engineering and R&D - Cadmaxx"
+        },
+        {
+            "id": "63d7c89a549d78ed457d500ffbc10f17b81ac089ff3085d10d8d01cabe33aed8",
+            "url": "https://cadmaxx.com/industrial-automation/",
+            "title": "Industrial Automation - Cadmaxx"
+        },
+        {
+            "id": "d868b2923a50188c66efab9c4620007d219fe5126f8c035893c77f176f382768",
+            "url": "https://cadmaxx.com/digital-engineering-it-services/",
+            "title": "Digital Engineering & IT Services - Cadmaxx"
+        },
+        {
+            "id": "e722efe379dcecb85d9aafd7f29361f55b955279c67a7c545e1e30d28c469b02",
+            "url": "https://cadmaxx.com/system-integration/",
+            "title": "System Integration - Cadmaxx"
+        },
+        {
+            "id": "6469aa08406495149d2bdb2a87d3d969d2fec29c3655a143f08acad9e4cb89d4",
+            "url": "https://cadmaxx.com/defence-psu/",
+            "title": "Defence & PSU - Cadmaxx"
+        },
+        {
+            "id": "657e2f894a9dcd903844c3e454549ab46a251d4018ee558d38b61c8aa8f912e6",
+            "url": "https://cadmaxx.com/companies/",
+            "title": "Companies - Cadmaxx"
+        },
+        {
+            "id": "9e76fe7136d745b5af84c3e4010cd59c115836d8a4f804c5b74a3fe2ffa81f4f",
+            "url": "https://cadmaxx.com/leadership/",
+            "title": "Leadership - Cadmaxx"
+        },
+        {
+            "id": "0b39fe4d7fcc081fbac85dccd8e178d38fb27e04429ace445e9b896e83f19659",
+            "url": "https://cadmaxx.com/contact-us/",
+            "title": "Contact Us - Cadmaxx"
+        },
+        {
+            "id": "c614a35e87930431a344bd7d4cfd70919272aeff91d49dea5f236fb97c5633a3",
+            "url": "https://cadmaxx.com/industrial-electricals-automation/",
+            "title": "Page not found - Cadmaxx"
+        }
+    ],
+    "edges": [
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "4a3d0b9523fd5158ca0efeca63e4ad31adbdbfa228a0fb5bd0f2a7ff38053226",
+            "label": "About Cadmaxx",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "4a3d0b9523fd5158ca0efeca63e4ad31adbdbfa228a0fb5bd0f2a7ff38053226",
+            "label": "Awards & Recognition",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "362057311356c4fdc5f981273900f2038e3fe9fb8f3c6a31ac28258aa7b2158d",
+            "label": "Our Leadership",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "label": "Icon Click",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "8974e2c26bda1a243f239c95eb30687156a671632559f1eaccd8504b827ca217",
+            "label": "Engineering R&D Services",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "63d7c89a549d78ed457d500ffbc10f17b81ac089ff3085d10d8d01cabe33aed8",
+            "label": "Industrial Automation",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "d868b2923a50188c66efab9c4620007d219fe5126f8c035893c77f176f382768",
+            "label": "Digital Engineering & IT Services",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "e722efe379dcecb85d9aafd7f29361f55b955279c67a7c545e1e30d28c469b02",
+            "label": "System Integration",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "6469aa08406495149d2bdb2a87d3d969d2fec29c3655a143f08acad9e4cb89d4",
+            "label": "Defence & PSU",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "4a3d0b9523fd5158ca0efeca63e4ad31adbdbfa228a0fb5bd0f2a7ff38053226",
+            "label": "Industries",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "657e2f894a9dcd903844c3e454549ab46a251d4018ee558d38b61c8aa8f912e6",
+            "label": "Group Companies",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "9e76fe7136d745b5af84c3e4010cd59c115836d8a4f804c5b74a3fe2ffa81f4f",
+            "label": "Leadership",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "0b39fe4d7fcc081fbac85dccd8e178d38fb27e04429ace445e9b896e83f19659",
+            "label": "Contact Us",
+            "context": "nav"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "c614a35e87930431a344bd7d4cfd70919272aeff91d49dea5f236fb97c5633a3",
+            "label": "Read More",
+            "context": "content"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "4a3d0b9523fd5158ca0efeca63e4ad31adbdbfa228a0fb5bd0f2a7ff38053226",
+            "label": "Read More",
+            "context": "content"
+        },
+        {
+            "source": "8e81f824e80921126b0b6d5baea201b5b7686ee7721675f70e5c602325f53ad3",
+            "target": "4a3d0b9523fd5158ca0efeca63e4ad31adbdbfa228a0fb5bd0f2a7ff38053226",
+            "label": "Know More",
+            "context": "content"
+        },
+        {
+            "source": "362057311356c4fdc5f981273900f2038e3fe9fb8f3c6a31ac28258aa7b2158d",
+            "target": "4a3d0b9523fd5158ca0efeca63e4ad31adbdbfa228a0fb5bd0f2a7ff38053226",
+            "label": "Read Bio",
+            "context": "content"
+        },
+        {
+            "source": "8974e2c26bda1a243f239c95eb30687156a671632559f1eaccd8504b827ca217",
+            "target": "4a3d0b9523fd5158ca0efeca63e4ad31adbdbfa228a0fb5bd0f2a7ff38053226",
+            "label": "Icon Click",
+            "context": "content"
+        },
+        {
+            "source": "63d7c89a549d78ed457d500ffbc10f17b81ac089ff3085d10d8d01cabe33aed8",
+            "target": "4a3d0b9523fd5158ca0efeca63e4ad31adbdbfa228a0fb5bd0f2a7ff38053226",
+            "label": "Icon Click",
+            "context": "content"
+        },
+        {
+            "source": "9e76fe7136d745b5af84c3e4010cd59c115836d8a4f804c5b74a3fe2ffa81f4f",
+            "target": "4a3d0b9523fd5158ca0efeca63e4ad31adbdbfa228a0fb5bd0f2a7ff38053226",
+            "label": "Read Bio",
+            "context": "content"
+        }
+    ]
+}
