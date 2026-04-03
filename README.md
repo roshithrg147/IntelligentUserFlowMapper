@@ -133,3 +133,23 @@ The `graph_serializer.py` strictly complies with frontend UI requirements, clean
   ]
 }
 ```
+
+## 🤖 MCP Server & Agentic UI Tools
+
+This crawler can now be run as a **Model Context Protocol (MCP)** Server! By running the server, you can give any AI agent (like Claude Desktop or custom UIs) direct access to crawl, map, and interact with web applications autonomously.
+
+### Available MCP Tools
+1. `map_user_flows`: Crawls a web app and maps UI flows.
+2. `get_ui_snapshot`: Takes a full-page screenshot and returns Base64.
+3. `extract_form_schema`: Maps all forms and input fields.
+4. `execute_ui_action`: Clicks or fills specific UI elements.
+5. `test_user_journey`: Tests a sequence of UI actions.
+6. `get_auth_cookies`: Automates login and harvests cookies.
+
+### Running the Server
+```bash
+pip install -r requirements.txt mcp starlette uvicorn httpx playwright
+playwright install
+python mcp_server.py
+```
+The server will start on `http://0.0.0.0:8000/sse`.
