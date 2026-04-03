@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from pydantic.types import FailFast
-from typing import List, TypedDict, Annotated
+from typing import List, Annotated
+from typing_extensions import TypedDict
 from function_logger import log_result
 
 
