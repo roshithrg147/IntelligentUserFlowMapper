@@ -20,7 +20,7 @@ async def map_user_flows(url: str, max_depth: int = 3, max_pages: int = 15) -> s
     print(f"Starting crawl for {url}...")
     crawler = CrawlerEngine(url, max_dep=max_depth, max_pages=max_pages)
     graph_data = await crawler.run()
-    return graph_data.model_dump_json()
+    return graph_data
 
 @mcp.tool()
 async def get_ui_snapshot(url: str) -> str:
@@ -125,5 +125,8 @@ app.add_middleware(
 
 app.mount("/", mcp.sse_app())
 
+import os
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
