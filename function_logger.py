@@ -1,4 +1,5 @@
 import logging
+import re
 from logging.handlers import RotatingFileHandler
 import os
 import inspect
@@ -13,6 +14,18 @@ os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 # Configure structured logging
 logger = logging.getLogger("CrawlerLogger")
 logger.setLevel(logging.DEBUG) # Set to DEBUG for maximum verbosity
+
+# Redaction helper
+def redact_secrets(text):
+    if not isinstance(text, str):
+        return text
+    # Regex to find potential sensitive fields
+    patterns = [
+        r'(password|token|secret|key|auth|Authorization)\s*[:=]\s*["\']?[^"\s,]+["\']?',
+    ]
+    for pattern in patterns:
+        text = re.sub(pattern, r'\1=REDACTED', text, flags=re.IGNORECASE)
+    return text
 
 # StreamHandler for Cloud Run (stdout/stderr)
 stream_handler = logging.StreamHandler(sys.stdout)
@@ -39,7 +52,8 @@ def log_result(func):
                 logger.debug(f"Function {func.__name__} executed successfully.") # Use debug for success
                 return result
             except Exception as e:
-                logger.error(f"Error in {func.__name__}: {e}", exc_info=True) # Log full traceback
+                clean_error = redact_secrets(str(e))
+                logger.error(f"Error in {func.__name__}: {clean_error}", exc_info=True) # Log full traceback
                 raise e
         return async_wrapper
     else:
@@ -50,7 +64,8 @@ def log_result(func):
                 logger.debug(f"Function {func.__name__} executed successfully.") # Use debug for success
                 return result
             except Exception as e:
-                logger.error(f"Error in {func.__name__}: {e}", exc_info=True) # Log full traceback
+                clean_error = redact_secrets(str(e))
+                logger.error(f"Error in {func.__name__}: {clean_error}", exc_info=True) # Log full traceback
                 raise e
         return sync_wrapper
 

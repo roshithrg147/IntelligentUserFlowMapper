@@ -36,12 +36,21 @@ class CrawlerEngine:
         
         # Special tracking for the very first node to initiate flow extraction later
         self.root_state_id = None
+        self.paused = asyncio.Event()
+        self.paused.set()
+        self.max_workers = 4
         
-        
-    async def worker(self, browser_context):
+    async def worker(self, browser_context, worker_id):
         page = await browser_context.new_page()
         await setup_interception(page)
         while True:
+            await self.paused.wait()
+            
+            # If we are throttled, only worker_id 0 should proceed
+            if self.max_workers == 1 and worker_id != 0:
+                await asyncio.sleep(60) # Wait out the throttle
+                continue
+
             item = await self.redis_client.lpop(self.queue_key)
             if not item:
                 await asyncio.sleep(0.5)
@@ -75,6 +84,14 @@ class CrawlerEngine:
                 await process_page(self, page, url, depth, source_id, action, context_tag)
             except Exception as e:
                 print(f"Worker error processing {url}: {e}")
+                if "RateLimitException" in str(e):
+                    print("Rate limit detected! Pausing workers for 60 seconds.")
+                    self.max_workers = 1
+                    self.paused.clear()
+                    await asyncio.sleep(60)
+                    self.max_workers = 4
+                    self.paused.set()
+
 
     async def enqueue(self, url, depth, source_id, action, context_tag):
         data = json.dumps({
@@ -102,8 +119,8 @@ class CrawlerEngine:
             await page.close()
             
             workers = []
-            for _ in range(4): # Spawn 4 worker tasks
-                task = asyncio.create_task(self.worker(context))
+            for i in range(4): # Spawn 4 worker tasks
+                task = asyncio.create_task(self.worker(context, i))
                 workers.append(task)
                 
             # Wait for queue to be empty and processing to finish

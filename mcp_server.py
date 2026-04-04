@@ -7,6 +7,7 @@ from mcp.server.fastmcp import FastMCP
 from starlette.applications import Starlette
 from starlette.middleware.cors import CORSMiddleware
 from playwright.async_api import async_playwright
+from playwright_stealth import stealth_async
 
 # Import your existing crawler components
 from main import CrawlerEngine
@@ -29,7 +30,9 @@ async def get_ui_snapshot(url: str) -> str:
     """Navigates to a URL and returns a Base64 encoded full-page screenshot (JPEG)."""
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
+        context = await browser.new_context()
+        page = await context.new_page()
+        await stealth_async(page)
         await page.goto(url, wait_until="networkidle")
         screenshot_bytes = await page.screenshot(full_page=True, type="jpeg", quality=60)
         await browser.close()
@@ -41,7 +44,9 @@ async def extract_form_schema(url: str) -> str:
     """Extracts all forms, input fields, and validation rules from a URL."""
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
+        context = await browser.new_context()
+        page = await context.new_page()
+        await stealth_async(page)
         await page.goto(url, wait_until="domcontentloaded")
         schema = await page.evaluate('''() => {
             return Array.from(document.querySelectorAll('form')).map((f, i) => {
@@ -63,7 +68,9 @@ async def execute_ui_action(url: str, target_element_text: str, action: str = "c
     """Executes a specific action ('click' or 'fill') on an element containing specific text."""
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
+        context = await browser.new_context()
+        page = await context.new_page()
+        await stealth_async(page)
         await page.goto(url, wait_until="domcontentloaded")
         try:
             if input_text and action == "fill":
@@ -86,7 +93,9 @@ async def test_user_journey(start_url: str, target_button_sequence: list[str]) -
     """Tests a sequence of button clicks to verify a UI journey."""
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
+        context = await browser.new_context()
+        page = await context.new_page()
+        await stealth_async(page)
         await page.goto(start_url, wait_until="domcontentloaded")
         history = []
         for btn_text in target_button_sequence:
@@ -109,6 +118,7 @@ async def get_auth_cookies(login_url: str, username: str, password: str) -> str:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context()
         page = await context.new_page()
+        await stealth_async(page)
         # Uses your existing attempt_login from crawler_actions.py
         await attempt_login(page, login_url, username, password)
         cookies = await context.cookies()

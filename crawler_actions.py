@@ -1,9 +1,20 @@
 import asyncio
+import random
 from urllib.parse import urlparse, urljoin, urldefrag
 from utils import get_state_hash
 from function_logger import log_result
-
+from playwright_stealth import stealth_async
 from contextlib import suppress
+
+@log_result
+async def perform_human_action(page):
+    """Adds human-like behavior: randomized delay and mouse movements/scroll."""
+    await asyncio.sleep(random.uniform(1, 3))
+    # Random scroll
+    await page.mouse.wheel(0, random.randint(100, 500))
+    # Random mouse move
+    await page.mouse.move(random.randint(0, 100), random.randint(0, 100))
+    await asyncio.sleep(random.uniform(0.5, 1.5))
 
 @log_result
 async def setup_interception(page):
@@ -26,8 +37,10 @@ async def attempt_login(page, start_url, username, password):
         return
 
     try:
+        await stealth_async(page)
         print("Attempting authentication...")
         await page.goto(start_url, wait_until="domcontentloaded", timeout=10000)
+        await perform_human_action(page)
         await page.fill("input[type='email'], input[name*='user']", username, timeout=3000)
         await page.fill("input[type='password'], input[name*='pass']", password, timeout=3000)
         await page.click("button[type='submit'], input[type='submit'], [role='button']:has-text('Log in')")
@@ -40,6 +53,7 @@ async def attempt_login(page, start_url, username, password):
 async def process_page(engine, page, url, depth, source_id, action, context="content"):
     """Core logic for visiting a single URL, hashing its state, and enqueuing links."""
     try:
+        await stealth_async(page)
         parsed_url = urlparse(url)
         if parsed_url.netloc != engine.base_domain:
             print(f"Blocking external jump to: {url}")
@@ -52,7 +66,16 @@ async def process_page(engine, page, url, depth, source_id, action, context="con
                 pass
         
         print(f"Exploring: {url}, (Depth:{depth})")
-        await page.goto(url, wait_until="domcontentloaded", timeout=6000)
+        response = await page.goto(url, wait_until="domcontentloaded", timeout=6000)
+        if response and response.status in [403, 429]:
+            raise Exception(f"RateLimitException: {response.status}")
+        
+        # Check for CAPTCHA
+        content = await page.content()
+        if "captcha" in content.lower():
+            raise Exception("RateLimitException: CAPTCHA detected")
+
+        await perform_human_action(page)
         
         current_state_id = await asyncio.wait_for(get_state_hash(page), timeout=5.0)
         

@@ -32,25 +32,28 @@ def save_result(data, filename="user_flow.json", folder="results"):
 async def get_state_hash(page):
     try:
         # Optimization: Use a single JS evaluation to gather all element data at once.
-        # This is much faster and more resilient than making multiple sequential calls from Python.
+        # Use tagName and className ONLY, ignore innerText and IDs.
+        # Exclude noise areas: header, footer, recommendations, profile.
         element_signatures = await page.evaluate("""
             () => {
                 const elements = document.querySelectorAll("button, a, input, [role='button']");
-                return Array.from(elements).map(e => {
-                    const tag = e.tagName;
-                    const text = (e.innerText || "").trim();
-                    const id = e.id || "";
-                    return `${tag} : ${id}:${text}`;
-                });
+                
+                // Helper to check if element is inside excluded area
+                const isNoise = (el) => {
+                    return el.closest('header, footer, .recommendations, .profile, #header, #footer');
+                };
+
+                return Array.from(elements)
+                    .filter(e => !isNoise(e))
+                    .map(e => `${e.tagName}:${e.className || ''}`)
+                    .sort();
             }
         """)
         
         if not element_signatures:
             return hashlib.sha256(b"empty").hexdigest()
 
-        element_signatures.sort()
         combined_string = "|".join(element_signatures)
         return hashlib.sha256(combined_string.encode()).hexdigest()
     except Exception:
-        # Return a default hash if the page disappears or evaluation fails
         return hashlib.sha256(b"error").hexdigest()
