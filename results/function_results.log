@@ -395,3 +395,9 @@
 {"module": "model", "function": "_get_node_by_id", "result": "[Complex Object: dict, length=3]"}
 {"module": "model", "function": "_get_node_by_id", "result": "[Complex Object: dict, length=3]"}
 {"module": "model", "function": "extract_flows", "result": "None"}
+{"module": "function_logger", "function": "async_wrapper", "message": Function add_node executed successfully.}
+{"module": "function_logger", "function": "async_wrapper", "message": Function _get_node_by_id executed successfully.}
+{"module": "function_logger", "function": "async_wrapper", "message": Function add_node executed successfully.}
+{"module": "function_logger", "function": "async_wrapper", "message": Function _get_node_by_id executed successfully.}
+{"module": "function_logger", "function": "async_wrapper", "message": Function add_node executed successfully.}
+{"module": "function_logger", "function": "async_wrapper", "message": Function _get_node_by_id executed successfully.}

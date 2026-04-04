@@ -24,8 +24,7 @@ class CrawlerEngine:
         
         self.graph = GraphManager()
         
-        # self.redis_client = redis.from_url(settings.redis_url, decode_responses=True)
-        self.queue = deque()
+        self.queue = asyncio.Queue()
         self.queue_key = f"crawler_queue:{get_state_hash_sync(start_url)}"
         
         self.visited_states = set()
@@ -48,17 +47,10 @@ class CrawlerEngine:
         while True:
             await self.paused.wait()
             
-            # If we are throttled, only worker_id 0 should proceed
-            if self.max_workers == 1 and worker_id != 0:
-                await asyncio.sleep(60) # Wait out the throttle
-                continue
-
-            # item = await self.redis_client.lpop(self.queue_key)
             try:
-                item = self.queue.popleft()
-            except IndexError:
-                await asyncio.sleep(0.5)
-                continue
+                item = await self.queue.get()
+            except asyncio.CancelledError:
+                break
                 
             try:
                 data = json.loads(item)
@@ -68,9 +60,11 @@ class CrawlerEngine:
                 action = data['action']
                 context_tag = data['context_tag']
             except Exception:
+                self.queue.task_done()
                 continue
             
             if url in self.processing_urls:
+                self.queue.task_done()
                 continue
                 
             self.processing_urls.add(url)
@@ -78,23 +72,24 @@ class CrawlerEngine:
             try:
                 v_size = len(self.visited_states)
                 if v_size >= self.max_pages:
+                    self.queue.task_done()
                     continue
                 
-                q_size = len(self.queue)
+                q_size = self.queue.qsize()
                 print(f"----Progress: [Queue: {q_size}] | States Mapped: {v_size}----")
                 if depth > self.max_dep:
+                    self.queue.task_done()
                     continue
                     
                 await process_page(self, page, url, depth, source_id, action, context_tag)
             except Exception as e:
-                print(f"Worker error processing {url}: {e}")
+                import logging
+                logging.exception(f"Worker error processing {url}")
                 if "RateLimitException" in str(e):
-                    print("Rate limit detected! Pausing workers for 60 seconds.")
-                    self.max_workers = 1
-                    self.paused.clear()
+                    print("Rate limit detected! Delaying worker.")
                     await asyncio.sleep(60)
-                    self.max_workers = 4
-                    self.paused.set()
+            finally:
+                self.queue.task_done()
 
 
     async def enqueue(self, url, depth, source_id, action, context_tag):
@@ -105,14 +100,14 @@ class CrawlerEngine:
             "action": action,
             "context_tag": context_tag
         })
-        self.queue.append(data)
-        # await self.redis_client.rpush(self.queue_key, data)
+        await self.queue.put(data)
 
     async def run(self):
         """Main orchestrator for the crawling process."""
-        # Initialize queue
-        # await self.redis_client.delete(self.queue_key)
-        self.queue.clear()
+        await self.graph.init_db()
+        while not self.queue.empty():
+            self.queue.get_nowait()
+            self.queue.task_done()
         await self.enqueue(self.start_url, 0, None, "Start", "content")
         
         async with async_playwright() as p:
@@ -130,16 +125,7 @@ class CrawlerEngine:
                 workers.append(task)
                 
             # Wait for queue to be empty and processing to finish
-            while True:
-                q_size = len(self.queue)
-                # Since we don't have task_done for redis, a simple heuristic:
-                if q_size == 0 and len(self.processing_urls) >= len(self.visited_states) and len(self.visited_states) > 0:
-                    await asyncio.sleep(2)
-                    if len(self.queue) == 0:
-                        break
-                elif len(self.visited_states) >= self.max_pages:
-                    break
-                await asyncio.sleep(1)
+            await self.queue.join()
             
             for w in workers:
                 w.cancel()
@@ -150,9 +136,9 @@ class CrawlerEngine:
             
         if self.root_state_id:
             print("Extracting linear user flows...")
-            self.graph.extract_flows(self.root_state_id)
+            await self.graph.extract_flows(self.root_state_id)
             
-        self.graph.prepare_serialization()
+        await self.graph.prepare_serialization()
         return self.graph.graph
        
 if __name__ == "__main__":

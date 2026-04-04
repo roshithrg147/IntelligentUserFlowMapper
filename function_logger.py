@@ -1,5 +1,6 @@
 import logging
 import re
+import json
 from logging.handlers import RotatingFileHandler
 import os
 import inspect
@@ -19,9 +20,30 @@ logger.setLevel(logging.DEBUG) # Set to DEBUG for maximum verbosity
 def redact_secrets(text):
     if not isinstance(text, str):
         return text
+    
+    # Simple JSON parsing to redact structured logs
+    try:
+        data = json.loads(text)
+        def _mask_dict(d):
+            if isinstance(d, dict):
+                for k, v in d.items():
+                    if any(s in k.lower() for s in ["password", "token", "secret", "key", "auth", "authorization"]):
+                        d[k] = "REDACTED"
+                    else:
+                        _mask_dict(v)
+            elif isinstance(d, list):
+                for item in d:
+                    _mask_dict(item)
+            return d
+        
+        masked_data = _mask_dict(data)
+        return json.dumps(masked_data)
+    except json.JSONDecodeError:
+        pass
+        
     # Regex to find potential sensitive fields
     patterns = [
-        r'(password|token|secret|key|auth|Authorization)\s*[:=]\s*["\']?[^"\s,]+["\']?',
+        r'(password|token|secret|key|auth|Authorization)\s*[:=]\s*["\']?[^"\']+(?=["\']?)',
     ]
     for pattern in patterns:
         text = re.sub(pattern, r'\1=REDACTED', text, flags=re.IGNORECASE)

@@ -86,10 +86,10 @@ async def process_page(engine, page, url, depth, source_id, action, context="con
         if engine.root_state_id is None:
             engine.root_state_id = current_state_id
             
-        engine.graph.add_node(current_state_id, url, await page.title())
+        await engine.graph.add_node(current_state_id, url, await page.title())
         
         if source_id is not None:
-            engine.graph.add_edge(source_id, current_state_id, action, context)
+            await engine.graph.add_edge(source_id, current_state_id, action, context)
         
         if current_state_id in engine.visited_states:
             return
