@@ -3,6 +3,7 @@ from logging.handlers import RotatingFileHandler
 import os
 import inspect
 from functools import wraps
+import sys # Import sys for StreamHandler
 
 LOG_FILE = "results/function_results.log"
 
@@ -11,13 +12,21 @@ os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
 # Configure structured logging
 logger = logging.getLogger("CrawlerLogger")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG) # Set to DEBUG for maximum verbosity
 
-# RotatingFileHandler: 5MB max, 3 backups
-handler = RotatingFileHandler(LOG_FILE, maxBytes=5*1024*1024, backupCount=3)
-formatter = logging.Formatter('{"module": "%(module)s", "function": "%(funcName)s", "message": %(message)s}')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+# StreamHandler for Cloud Run (stdout/stderr)
+stream_handler = logging.StreamHandler(sys.stdout)
+stream_handler.setLevel(logging.DEBUG) # Set to DEBUG for maximum verbosity
+stream_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+stream_handler.setFormatter(stream_formatter)
+logger.addHandler(stream_handler)
+
+# RotatingFileHandler: 5MB max, 3 backups (for local debugging/persistence if needed)
+file_handler = RotatingFileHandler(LOG_FILE, maxBytes=5*1024*1024, backupCount=3)
+file_handler.setLevel(logging.DEBUG) # Set to DEBUG for maximum verbosity
+file_formatter = logging.Formatter('{"module": "%(module)s", "function": "%(funcName)s", "message": %(message)s}')
+file_handler.setFormatter(file_formatter)
+logger.addHandler(file_handler)
 
 def log_result(func):
     """Decorator to log function calls and their results."""
@@ -27,10 +36,10 @@ def log_result(func):
         async def async_wrapper(*args, **kwargs):
             try:
                 result = await func(*args, **kwargs)
-                _log_entry(func.__name__, result)
+                logger.debug(f"Function {func.__name__} executed successfully.") # Use debug for success
                 return result
             except Exception as e:
-                _log_entry(func.__name__, f"Error: {str(e)}")
+                logger.error(f"Error in {func.__name__}: {e}", exc_info=True) # Log full traceback
                 raise e
         return async_wrapper
     else:
@@ -38,24 +47,10 @@ def log_result(func):
         def sync_wrapper(*args, **kwargs):
             try:
                 result = func(*args, **kwargs)
-                _log_entry(func.__name__, result)
+                logger.debug(f"Function {func.__name__} executed successfully.") # Use debug for success
                 return result
             except Exception as e:
-                _log_entry(func.__name__, f"Error: {str(e)}")
+                logger.error(f"Error in {func.__name__}: {e}", exc_info=True) # Log full traceback
                 raise e
         return sync_wrapper
 
-def _log_entry(func_name, result):
-    import json
-    try:
-        # Simplified truncation logic
-        res_str = str(result)
-        if len(res_str) > 2000:
-            res_str = res_str[:2000] + "... [truncated]"
-        
-        # We need to escape double quotes for JSON string if we are using string formatting
-        # Actually, let's just use json.dumps for the message part
-        message = json.dumps({"result": res_str})
-        logger.info(message)
-    except Exception as e:
-        logger.error(json.dumps({"error": str(e)}))
