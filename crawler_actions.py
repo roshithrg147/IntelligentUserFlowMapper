@@ -51,7 +51,7 @@ async def process_page(engine, page, url, depth, source_id, action, context="con
             case _:
                 pass
         
-        print(f"Exploring: {url}, (Depth:{depth}) | Queue: {engine.queue.qsize()}")
+        print(f"Exploring: {url}, (Depth:{depth})")
         await page.goto(url, wait_until="domcontentloaded", timeout=6000)
         
         current_state_id = await asyncio.wait_for(get_state_hash(page), timeout=5.0)
