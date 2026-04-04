@@ -21,8 +21,5 @@ COPY . .
 # Create the results directory for SQLite persistence
 RUN mkdir -p results && chmod 777 results
 
-# Expose the dynamic Cloud Run port
-EXPOSE 8080
-
-# Start the server using the PORT environment variable provided by Cloud Run
-CMD uvicorn mcp_server:app --host 0.0.0.0 --port $PORT --log-level debug
+# Start the server using the python entrypoint to properly bind the PORT
+CMD ["python", "mcp_server.py"]
