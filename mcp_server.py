@@ -10,6 +10,7 @@ from playwright.async_api import async_playwright
 # Import your existing crawler components
 from main import CrawlerEngine
 from crawler_actions import attempt_login
+from config import settings
 
 # 1. Initialize FastMCP
 mcp = FastMCP("UI-Flow-Mapper-Pro")

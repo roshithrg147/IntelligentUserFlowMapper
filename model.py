@@ -5,6 +5,10 @@ from typing_extensions import TypedDict
 from function_logger import log_result
 
 
+import sqlite3
+import json
+from config import settings
+
 class Node(TypedDict):
     id: str
     url: str
@@ -29,33 +33,62 @@ class GraphData(BaseModel):
 class GraphManager:
     def __init__(self):
         self.graph = GraphData()
-        self._nodes_dict = {}
+        self.db_path = settings.sqlite_db_path
+        self._init_db()
         self._edges_set = set()
         
+    def _init_db(self):
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute('''CREATE TABLE IF NOT EXISTS nodes
+                            (id TEXT PRIMARY KEY, data TEXT)''')
+            conn.execute('''CREATE TABLE IF NOT EXISTS edges
+                            (source TEXT, target TEXT, label TEXT, context TEXT, PRIMARY KEY (source, target, label, context))''')
+        
+    def get_all_nodes(self):
+        with sqlite3.connect(self.db_path) as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT data FROM nodes")
+            return [json.loads(row[0]) for row in cur.fetchall()]
+
+    def get_all_edges(self):
+        with sqlite3.connect(self.db_path) as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT source, target, label, context FROM edges")
+            return [{"source": row[0], "target": row[1], "label": row[2], "context": row[3]} for row in cur.fetchall()]
+
+    def prepare_serialization(self):
+        self.graph.nodes = self.get_all_nodes()
+        self.graph.edges = self.get_all_edges()
+
     @log_result
     def add_node(self, node_id, url, title):
-        if node_id not in self._nodes_dict:
-            node_obj = {"id": node_id, "url": url, "title": title}
-            self._nodes_dict[node_id] = node_obj
-            self.graph.nodes.append(node_obj)
+        node_obj = {"id": node_id, "url": url, "title": title}
+        with sqlite3.connect(self.db_path) as conn:
+            cur = conn.cursor()
+            cur.execute("INSERT OR IGNORE INTO nodes (id, data) VALUES (?, ?)", (node_id, json.dumps(node_obj)))
         
     @log_result
     def add_edge(self, source, target, label, context="content"):
-        edge_tuple = (source, target, label, context)
-        if edge_tuple not in self._edges_set:
-            self._edges_set.add(edge_tuple)
-            self.graph.edges.append({"source": source, "target": target, "label": label, "context": context})
+        with sqlite3.connect(self.db_path) as conn:
+            cur = conn.cursor()
+            cur.execute("INSERT OR IGNORE INTO edges (source, target, label, context) VALUES (?, ?, ?, ?)", (source, target, label, context))
             
     @log_result
     def _get_node_by_id(self, node_id):
-        return self._nodes_dict.get(node_id)
+        with sqlite3.connect(self.db_path) as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT data FROM nodes WHERE id = ?", (node_id,))
+            row = cur.fetchone()
+            if row:
+                return json.loads(row[0])
+        return None
 
     @log_result
     def extract_flows(self, start_node_id):
         """Uses priority-based Beam Search to extract linear flows from the graph, handling cycles safely."""
         # Build adjacency list
         adj = {}
-        for edge in self.graph.edges:
+        for edge in self.get_all_edges():
             adj.setdefault(edge["source"], []).append(edge)
 
         def edge_weight(label, context):

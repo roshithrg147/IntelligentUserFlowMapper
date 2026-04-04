@@ -101,7 +101,7 @@ async def process_page(engine, page, url, depth, source_id, action, context="con
                     next_context = "nav" if is_nav else "content"
                     
                     engine.queued_urls.add(abs_url)
-                    engine.queue.put_nowait((abs_url, depth + 1, current_state_id, text, next_context))
+                    await engine.enqueue(abs_url, depth + 1, current_state_id, text, next_context)
                 
     except asyncio.TimeoutError:
         print(f"Timeout on {url}, Skipping")

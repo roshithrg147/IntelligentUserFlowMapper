@@ -4,7 +4,9 @@ import asyncio
 from collections import deque
 from playwright.async_api import async_playwright
 from urllib.parse import urlparse
+import redis.asyncio as redis
 
+from config import settings
 from utils import get_state_hash, save_result
 from model import GraphManager
 from crawler_actions import setup_interception, attempt_login, process_page
@@ -15,14 +17,15 @@ class CrawlerEngine:
         self.start_url = start_url
         self.max_dep = max_dep
         self.max_pages = max_pages
-        self.username = username
-        self.password = password
+        self.username = username or settings.crawler_username
+        self.password = password or settings.crawler_password
         self.base_domain = urlparse(start_url).netloc
         
         self.graph = GraphManager()
         
-        self.queue = asyncio.Queue()
-        self.queue.put_nowait((start_url, 0, None, "Start", "content"))
+        self.redis_client = redis.from_url(settings.redis_url, decode_responses=True)
+        self.queue_key = f"crawler_queue:{get_state_hash(start_url)}"
+        
         self.visited_states = set()
         self.queued_urls = set()
         self.queued_urls.add(self.start_url)
@@ -35,14 +38,26 @@ class CrawlerEngine:
         self.root_state_id = None
         
         
-    async def worker(self, queue, browser_context):
+    async def worker(self, browser_context):
         page = await browser_context.new_page()
         await setup_interception(page)
         while True:
-            url, depth, source_id, action, context_tag = await queue.get()
+            item = await self.redis_client.lpop(self.queue_key)
+            if not item:
+                await asyncio.sleep(0.5)
+                continue
+                
+            try:
+                data = json.loads(item)
+                url = data['url']
+                depth = data['depth']
+                source_id = data['source_id']
+                action = data['action']
+                context_tag = data['context_tag']
+            except Exception:
+                continue
             
             if url in self.processing_urls:
-                queue.task_done()
                 continue
                 
             self.processing_urls.add(url)
@@ -52,7 +67,7 @@ class CrawlerEngine:
                 if v_size >= self.max_pages:
                     continue
                 
-                q_size = queue.qsize()
+                q_size = await self.redis_client.llen(self.queue_key)
                 print(f"----Progress: [Queue: {q_size}] | States Mapped: {v_size}----")
                 if depth > self.max_dep:
                     continue
@@ -60,11 +75,23 @@ class CrawlerEngine:
                 await process_page(self, page, url, depth, source_id, action, context_tag)
             except Exception as e:
                 print(f"Worker error processing {url}: {e}")
-            finally:
-                queue.task_done()
+
+    async def enqueue(self, url, depth, source_id, action, context_tag):
+        data = json.dumps({
+            "url": url,
+            "depth": depth,
+            "source_id": source_id,
+            "action": action,
+            "context_tag": context_tag
+        })
+        await self.redis_client.rpush(self.queue_key, data)
 
     async def run(self):
         """Main orchestrator for the crawling process."""
+        # Initialize queue
+        await self.redis_client.delete(self.queue_key)
+        await self.enqueue(self.start_url, 0, None, "Start", "content")
+        
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             context = await browser.new_context(viewport={'width':1280, 'height': 720})
@@ -76,10 +103,20 @@ class CrawlerEngine:
             
             workers = []
             for _ in range(4): # Spawn 4 worker tasks
-                task = asyncio.create_task(self.worker(self.queue, context))
+                task = asyncio.create_task(self.worker(context))
                 workers.append(task)
                 
-            await self.queue.join()
+            # Wait for queue to be empty and processing to finish
+            while True:
+                q_size = await self.redis_client.llen(self.queue_key)
+                # Since we don't have task_done for redis, a simple heuristic:
+                if q_size == 0 and len(self.processing_urls) >= len(self.visited_states) and len(self.visited_states) > 0:
+                    await asyncio.sleep(2)
+                    if await self.redis_client.llen(self.queue_key) == 0:
+                        break
+                elif len(self.visited_states) >= self.max_pages:
+                    break
+                await asyncio.sleep(1)
             
             for w in workers:
                 w.cancel()
@@ -92,6 +129,7 @@ class CrawlerEngine:
             print("Extracting linear user flows...")
             self.graph.extract_flows(self.root_state_id)
             
+        self.graph.prepare_serialization()
         return self.graph.graph
        
 if __name__ == "__main__":
