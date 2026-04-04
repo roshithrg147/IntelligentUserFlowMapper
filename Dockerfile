@@ -7,6 +7,7 @@ WORKDIR /app
 COPY requirements.txt .
 # Add the MCP and server dependencies
 RUN pip install -r requirements.txt mcp starlette uvicorn httpx
+RUN pip freeze # Debug: list all installed packages
 
 # Copy your crawler code
 COPY . .

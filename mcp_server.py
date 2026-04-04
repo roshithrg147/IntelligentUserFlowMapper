@@ -1,3 +1,4 @@
+print("MCP Server starting up...") # Debug line
 import json
 import asyncio
 import base64
