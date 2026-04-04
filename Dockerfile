@@ -6,8 +6,8 @@ WORKDIR /app
 # Copy requirements and install them
 COPY requirements.txt .
 # Add the MCP and server dependencies
-RUN pip install -r requirements.txt mcp starlette uvicorn httpx
-RUN pip freeze # Debug: list all installed packages
+RUN pip install --no-cache-dir -r requirements.txt
+RUN playwright install --with-deps chromium
 
 # Copy your crawler code
 COPY . .
