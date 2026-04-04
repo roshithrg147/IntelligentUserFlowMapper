@@ -60,11 +60,9 @@ class CrawlerEngine:
                 action = data['action']
                 context_tag = data['context_tag']
             except Exception:
-                self.queue.task_done()
                 continue
             
             if url in self.processing_urls:
-                self.queue.task_done()
                 continue
                 
             self.processing_urls.add(url)
@@ -72,13 +70,11 @@ class CrawlerEngine:
             try:
                 v_size = len(self.visited_states)
                 if v_size >= self.max_pages:
-                    self.queue.task_done()
                     continue
                 
                 q_size = self.queue.qsize()
                 print(f"----Progress: [Queue: {q_size}] | States Mapped: {v_size}----")
                 if depth > self.max_dep:
-                    self.queue.task_done()
                     continue
                     
                 await process_page(self, page, url, depth, source_id, action, context_tag)
