@@ -1,6 +1,11 @@
 import os
 import hashlib
+import json
 from function_logger import log_result
+
+def get_state_hash_sync(url):
+    """Fallback hash for strings/URLs when no page context is available."""
+    return hashlib.sha256(url.encode()).hexdigest()
 
 @log_result
 def save_result(data, filename="user_flow.json", folder="results"):

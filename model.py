@@ -7,6 +7,7 @@ from function_logger import log_result
 
 import sqlite3
 import json
+import os
 from config import settings
 
 class Node(TypedDict):
@@ -38,6 +39,8 @@ class GraphManager:
         self._edges_set = set()
         
     def _init_db(self):
+        # Create results directory if it doesn't exist
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         with sqlite3.connect(self.db_path) as conn:
             conn.execute('''CREATE TABLE IF NOT EXISTS nodes
                             (id TEXT PRIMARY KEY, data TEXT)''')

@@ -4,10 +4,10 @@ import asyncio
 from collections import deque
 from playwright.async_api import async_playwright
 from urllib.parse import urlparse
-import redis.asyncio as redis
+# import redis.asyncio as redis
 
 from config import settings
-from utils import get_state_hash, save_result
+from utils import get_state_hash, get_state_hash_sync, save_result
 from model import GraphManager
 from crawler_actions import setup_interception, attempt_login, process_page
 from graph_serializer import serialize_graph_to_disk
@@ -17,14 +17,16 @@ class CrawlerEngine:
         self.start_url = start_url
         self.max_dep = max_dep
         self.max_pages = max_pages
-        self.username = username or settings.crawler_username
-        self.password = password or settings.crawler_password
+        # Convert SecretStr to string safely if provided, otherwise fallback to settings
+        self.username = username or (settings.crawler_username.get_secret_value() if settings.crawler_username else None)
+        self.password = password or (settings.crawler_password.get_secret_value() if settings.crawler_password else None)
         self.base_domain = urlparse(start_url).netloc
         
         self.graph = GraphManager()
         
-        self.redis_client = redis.from_url(settings.redis_url, decode_responses=True)
-        self.queue_key = f"crawler_queue:{get_state_hash(start_url)}"
+        # self.redis_client = redis.from_url(settings.redis_url, decode_responses=True)
+        self.queue = deque()
+        self.queue_key = f"crawler_queue:{get_state_hash_sync(start_url)}"
         
         self.visited_states = set()
         self.queued_urls = set()
@@ -51,8 +53,10 @@ class CrawlerEngine:
                 await asyncio.sleep(60) # Wait out the throttle
                 continue
 
-            item = await self.redis_client.lpop(self.queue_key)
-            if not item:
+            # item = await self.redis_client.lpop(self.queue_key)
+            try:
+                item = self.queue.popleft()
+            except IndexError:
                 await asyncio.sleep(0.5)
                 continue
                 
@@ -76,7 +80,7 @@ class CrawlerEngine:
                 if v_size >= self.max_pages:
                     continue
                 
-                q_size = await self.redis_client.llen(self.queue_key)
+                q_size = len(self.queue)
                 print(f"----Progress: [Queue: {q_size}] | States Mapped: {v_size}----")
                 if depth > self.max_dep:
                     continue
@@ -101,12 +105,14 @@ class CrawlerEngine:
             "action": action,
             "context_tag": context_tag
         })
-        await self.redis_client.rpush(self.queue_key, data)
+        self.queue.append(data)
+        # await self.redis_client.rpush(self.queue_key, data)
 
     async def run(self):
         """Main orchestrator for the crawling process."""
         # Initialize queue
-        await self.redis_client.delete(self.queue_key)
+        # await self.redis_client.delete(self.queue_key)
+        self.queue.clear()
         await self.enqueue(self.start_url, 0, None, "Start", "content")
         
         async with async_playwright() as p:
@@ -125,11 +131,11 @@ class CrawlerEngine:
                 
             # Wait for queue to be empty and processing to finish
             while True:
-                q_size = await self.redis_client.llen(self.queue_key)
+                q_size = len(self.queue)
                 # Since we don't have task_done for redis, a simple heuristic:
                 if q_size == 0 and len(self.processing_urls) >= len(self.visited_states) and len(self.visited_states) > 0:
                     await asyncio.sleep(2)
-                    if await self.redis_client.llen(self.queue_key) == 0:
+                    if len(self.queue) == 0:
                         break
                 elif len(self.visited_states) >= self.max_pages:
                     break
@@ -152,4 +158,4 @@ class CrawlerEngine:
 if __name__ == "__main__":
     crawler = CrawlerEngine("http://books.toscrape.com/", max_dep=3, max_pages=15) # Reduced pages for quick test
     graph_data = asyncio.run(crawler.run())
-    serialize_graph_to_disk(graph_data, 'results/user_flow-books-toscrape.json')
+    serialize_graph_to_disk(graph_data, 'IntelligentUserFlowMapper_Dev/results/user_flow-books-toscrape.json')

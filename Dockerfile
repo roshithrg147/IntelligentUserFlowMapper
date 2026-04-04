@@ -1,19 +1,28 @@
-# Use the official Playwright Python image (includes browsers and OS dependencies)
+# Use the official Playwright Python image
 FROM mcr.microsoft.com/playwright/python:v1.49.1-jammy
+
+# Set environment variables for non-interactive installs and production
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PORT=8080
 
 WORKDIR /app
 
-# Copy requirements and install them
+# Copy only requirements first to leverage Docker cache
 COPY requirements.txt .
-# Add the MCP and server dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-RUN playwright install --with-deps chromium
 
-# Copy your crawler code
+# Install dependencies and Chromium
+RUN pip install --no-cache-dir -r requirements.txt && \
+    playwright install --with-deps chromium
+
+# Copy the rest of the application code
 COPY . .
 
-# Expose the port
-EXPOSE 8000
+# Create the results directory for SQLite persistence
+RUN mkdir -p results && chmod 777 results
 
-# Start the MCP server
-CMD ["uvicorn", "mcp_server:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "debug"]
+# Expose the dynamic Cloud Run port
+EXPOSE 8080
+
+# Start the server using the PORT environment variable provided by Cloud Run
+CMD uvicorn mcp_server:app --host 0.0.0.0 --port $PORT --log-level debug

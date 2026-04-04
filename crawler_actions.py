@@ -3,7 +3,6 @@ import random
 from urllib.parse import urlparse, urljoin, urldefrag
 from utils import get_state_hash
 from function_logger import log_result
-from playwright_stealth import stealth_async
 from contextlib import suppress
 
 @log_result
@@ -37,7 +36,8 @@ async def attempt_login(page, start_url, username, password):
         return
 
     try:
-        await stealth_async(page)
+        from playwright_stealth import stealth
+        await stealth(page)
         print("Attempting authentication...")
         await page.goto(start_url, wait_until="domcontentloaded", timeout=10000)
         await perform_human_action(page)
@@ -53,7 +53,11 @@ async def attempt_login(page, start_url, username, password):
 async def process_page(engine, page, url, depth, source_id, action, context="content"):
     """Core logic for visiting a single URL, hashing its state, and enqueuing links."""
     try:
-        await stealth_async(page)
+        # Import stealth here to handle potential import errors in headless environments
+        with suppress(ImportError):
+            from playwright_stealth import stealth
+            await stealth(page)
+            
         parsed_url = urlparse(url)
         if parsed_url.netloc != engine.base_domain:
             print(f"Blocking external jump to: {url}")

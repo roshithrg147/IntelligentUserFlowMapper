@@ -1,4 +1,3 @@
-print("MCP Server starting up...") # Debug line
 import json
 import asyncio
 import base64
@@ -7,7 +6,7 @@ from mcp.server.fastmcp import FastMCP
 from starlette.applications import Starlette
 from starlette.middleware.cors import CORSMiddleware
 from playwright.async_api import async_playwright
-from playwright_stealth import stealth_async
+from contextlib import suppress
 
 # Import your existing crawler components
 from main import CrawlerEngine
@@ -32,7 +31,9 @@ async def get_ui_snapshot(url: str) -> str:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context()
         page = await context.new_page()
-        await stealth_async(page)
+        with suppress(ImportError):
+            from playwright_stealth import stealth
+            await stealth(page)
         await page.goto(url, wait_until="networkidle")
         screenshot_bytes = await page.screenshot(full_page=True, type="jpeg", quality=60)
         await browser.close()
@@ -46,7 +47,9 @@ async def extract_form_schema(url: str) -> str:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context()
         page = await context.new_page()
-        await stealth_async(page)
+        with suppress(ImportError):
+            from playwright_stealth import stealth
+            await stealth(page)
         await page.goto(url, wait_until="domcontentloaded")
         schema = await page.evaluate('''() => {
             return Array.from(document.querySelectorAll('form')).map((f, i) => {
@@ -70,11 +73,12 @@ async def execute_ui_action(url: str, target_element_text: str, action: str = "c
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context()
         page = await context.new_page()
-        await stealth_async(page)
+        with suppress(ImportError):
+            from playwright_stealth import stealth
+            await stealth(page)
         await page.goto(url, wait_until="domcontentloaded")
         try:
             if input_text and action == "fill":
-                # Find input near the text label
                 await page.fill(f"text={target_element_text}", input_text, timeout=5000)
             else:
                 await page.click(f"text={target_element_text}", timeout=5000)
@@ -95,7 +99,9 @@ async def test_user_journey(start_url: str, target_button_sequence: list[str]) -
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context()
         page = await context.new_page()
-        await stealth_async(page)
+        with suppress(ImportError):
+            from playwright_stealth import stealth
+            await stealth(page)
         await page.goto(start_url, wait_until="domcontentloaded")
         history = []
         for btn_text in target_button_sequence:
@@ -118,8 +124,9 @@ async def get_auth_cookies(login_url: str, username: str, password: str) -> str:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context()
         page = await context.new_page()
-        await stealth_async(page)
-        # Uses your existing attempt_login from crawler_actions.py
+        with suppress(ImportError):
+            from playwright_stealth import stealth
+            await stealth(page)
         await attempt_login(page, login_url, username, password)
         cookies = await context.cookies()
         await browser.close()
@@ -137,5 +144,6 @@ app.add_middleware(
 
 app.mount("/", mcp.sse_app())
 
-import os
-
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run(app, host="0.0.0.0", port=port)
