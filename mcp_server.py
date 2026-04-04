@@ -40,18 +40,36 @@ async def lifespan(app: Starlette):
 # 1. Initialize FastMCP
 mcp = FastMCP("UI-Flow-Mapper-Pro")
 
+async def get_browser():
+    browser = browser_state["browser"]
+    if not browser or not browser.is_connected():
+        logger.warning("Browser disconnected. Rebooting Playwright instance...")
+        if browser_state["browser"]:
+            try:
+                await browser_state["browser"].close()
+            except Exception: pass
+        if browser_state["playwright"]:
+            try:
+                await browser_state["playwright"].stop()
+            except Exception: pass
+        browser_state["playwright"] = await async_playwright().start()
+        browser_state["browser"] = await browser_state["playwright"].chromium.launch(headless=True)
+    return browser_state["browser"]
+
 @mcp.tool()
 async def map_user_flows(url: str, max_depth: int = 3, max_pages: int = 15) -> str:
     """Crawls a web application and maps its UI user flows."""
-    print(f"Starting crawl for {url}...")
-    crawler = CrawlerEngine(url, max_dep=max_depth, max_pages=max_pages)
+    import uuid
+    session_id = str(uuid.uuid4())
+    print(f"Starting crawl for {url} with session {session_id}...")
+    crawler = CrawlerEngine(url, max_dep=max_depth, max_pages=max_pages, session_id=session_id)
     graph_data = await crawler.run()
     return graph_data.model_dump_json()
 
 @mcp.tool()
 async def get_ui_snapshot(url: str) -> str:
     """Navigates to a URL and returns a Base64 encoded full-page screenshot (JPEG)."""
-    browser = browser_state["browser"]
+    browser = await get_browser()
     context = await browser.new_context()
     page = await context.new_page()
     with suppress(ImportError):
@@ -68,7 +86,7 @@ async def get_ui_snapshot(url: str) -> str:
 @mcp.tool()
 async def extract_form_schema(url: str) -> str:
     """Extracts all forms, input fields, and validation rules from a URL."""
-    browser = browser_state["browser"]
+    browser = await get_browser()
     context = await browser.new_context()
     page = await context.new_page()
     with suppress(ImportError):
@@ -95,7 +113,7 @@ async def extract_form_schema(url: str) -> str:
 @mcp.tool()
 async def execute_ui_action(url: str, target_element_text: str, action: str = "click", input_text: str = None) -> str:
     """Executes a specific action ('click' or 'fill') on an element containing specific text."""
-    browser = browser_state["browser"]
+    browser = await get_browser()
     context = await browser.new_context()
     page = await context.new_page()
     with suppress(ImportError):
@@ -121,7 +139,7 @@ async def execute_ui_action(url: str, target_element_text: str, action: str = "c
 @mcp.tool()
 async def test_user_journey(start_url: str, target_button_sequence: list[str]) -> str:
     """Tests a sequence of button clicks to verify a UI journey."""
-    browser = browser_state["browser"]
+    browser = await get_browser()
     context = await browser.new_context()
     page = await context.new_page()
     with suppress(ImportError):
@@ -146,7 +164,7 @@ async def test_user_journey(start_url: str, target_button_sequence: list[str]) -
 @mcp.tool()
 async def get_auth_cookies(login_url: str, username: str, password: str) -> str:
     """Automates login and returns the session cookies."""
-    browser = browser_state["browser"]
+    browser = await get_browser()
     context = await browser.new_context()
     page = await context.new_page()
     with suppress(ImportError):

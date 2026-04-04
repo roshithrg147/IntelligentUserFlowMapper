@@ -33,9 +33,13 @@ class GraphData(BaseModel):
     edges: Annotated[List[Edge], FailFast()] = Field(default_factory=list)
 
 class GraphManager:
-    def __init__(self):
+    def __init__(self, session_id=None):
         self.graph = GraphData()
-        self.db_path = settings.sqlite_db_path
+        if session_id:
+            dir_name = os.path.dirname(settings.sqlite_db_path)
+            self.db_path = os.path.join(dir_name, f"nodes_{session_id}.db")
+        else:
+            self.db_path = settings.sqlite_db_path
         self._edges_set = set()
         self.conn = None
         
@@ -74,13 +78,12 @@ class GraphManager:
         if not self.conn: return
         node_obj = {"id": node_id, "url": url, "title": title}
         await self.conn.execute("INSERT OR IGNORE INTO nodes (id, data) VALUES (?, ?)", (node_id, json.dumps(node_obj)))
-        await self.conn.commit()
+        
         
     @log_result
     async def add_edge(self, source, target, label, context="content"):
         if not self.conn: return
         await self.conn.execute("INSERT OR IGNORE INTO edges (source, target, label, context) VALUES (?, ?, ?, ?)", (source, target, label, context))
-        await self.conn.commit()
             
     @log_result
     async def _get_node_by_id(self, node_id):

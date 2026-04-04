@@ -47,10 +47,6 @@ def redact_secrets(text):
     ]
     for pattern in patterns:
         text = re.sub(pattern, r'\1=REDACTED', text, flags=re.IGNORECASE)
-        
-    # Non-JSON string; truncate to prevent leakage
-    if len(text) > 200:
-        return text[:200] + "... [TRUNCATED FOR SECURITY]"
     return text
 
 # StreamHandler for Cloud Run (stdout/stderr)
