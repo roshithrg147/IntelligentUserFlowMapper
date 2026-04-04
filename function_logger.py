@@ -39,15 +39,10 @@ def redact_secrets(text):
         masked_data = _mask_dict(data)
         return json.dumps(masked_data)
     except json.JSONDecodeError:
-        pass
-        
-    # Regex to find potential sensitive fields
-    patterns = [
-        r'(password|token|secret|key|auth|Authorization)\s*[:=]\s*["\']?[^"\']+(?=["\']?)',
-    ]
-    for pattern in patterns:
-        text = re.sub(pattern, r'\1=REDACTED', text, flags=re.IGNORECASE)
-    return text
+        # Non-JSON string; truncate to prevent leakage
+        if len(text) > 200:
+            return text[:200] + "... [TRUNCATED FOR SECURITY]"
+        return text
 
 # StreamHandler for Cloud Run (stdout/stderr)
 stream_handler = logging.StreamHandler(sys.stdout)

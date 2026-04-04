@@ -1,7 +1,7 @@
 import os
 import json
 import asyncio
-from collections import deque
+
 from playwright.async_api import async_playwright
 from urllib.parse import urlparse
 # import redis.asyncio as redis
@@ -139,6 +139,7 @@ class CrawlerEngine:
             await self.graph.extract_flows(self.root_state_id)
             
         await self.graph.prepare_serialization()
+        await self.graph.close()
         return self.graph.graph
        
 if __name__ == "__main__":

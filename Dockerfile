@@ -18,10 +18,9 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 # Copy the rest of the application code
 COPY . .
 
-# Create the results directory for SQLite persistence and drop root
+# Create the results directory for persistence and drop root
 RUN useradd -m crawler_user && \
-    mkdir -p results && chown -R crawler_user:crawler_user /app && \
-    chmod 755 results
+    mkdir -p results && chown -R crawler_user:crawler_user /app
 
 USER crawler_user
 

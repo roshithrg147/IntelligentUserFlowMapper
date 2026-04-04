@@ -37,28 +37,33 @@ class GraphManager:
         self.graph = GraphData()
         self.db_path = settings.sqlite_db_path
         self._edges_set = set()
+        self.conn = None
         
     async def init_db(self):
         # Create results directory if it doesn't exist
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        async with aiosqlite.connect(self.db_path) as conn:
-            await conn.execute('''CREATE TABLE IF NOT EXISTS nodes
-                            (id TEXT PRIMARY KEY, data TEXT)''')
-            await conn.execute('''CREATE TABLE IF NOT EXISTS edges
-                            (source TEXT, target TEXT, label TEXT, context TEXT, PRIMARY KEY (source, target, label, context))''')
-            await conn.commit()
-        
+        self.conn = await aiosqlite.connect(self.db_path)
+        await self.conn.execute('''CREATE TABLE IF NOT EXISTS nodes
+                        (id TEXT PRIMARY KEY, data TEXT)''')
+        await self.conn.execute('''CREATE TABLE IF NOT EXISTS edges
+                        (source TEXT, target TEXT, label TEXT, context TEXT, PRIMARY KEY (source, target, label, context))''')
+        await self.conn.commit()
+
+    async def close(self):
+        if self.conn:
+            await self.conn.close()
+            self.conn = None        
     async def get_all_nodes(self):
-        async with aiosqlite.connect(self.db_path) as conn:
-            async with conn.execute("SELECT data FROM nodes") as cur:
-                rows = await cur.fetchall()
-                return [json.loads(row[0]) for row in rows]
+        if not self.conn: return []
+        async with self.conn.execute("SELECT data FROM nodes") as cur:
+            rows = await cur.fetchall()
+            return [json.loads(row[0]) for row in rows]
 
     async def get_all_edges(self):
-        async with aiosqlite.connect(self.db_path) as conn:
-            async with conn.execute("SELECT source, target, label, context FROM edges") as cur:
-                rows = await cur.fetchall()
-                return [{"source": row[0], "target": row[1], "label": row[2], "context": row[3]} for row in rows]
+        if not self.conn: return []
+        async with self.conn.execute("SELECT source, target, label, context FROM edges") as cur:
+            rows = await cur.fetchall()
+            return [{"source": row[0], "target": row[1], "label": row[2], "context": row[3]} for row in rows]
 
     async def prepare_serialization(self):
         self.graph.nodes = await self.get_all_nodes()
@@ -66,24 +71,24 @@ class GraphManager:
 
     @log_result
     async def add_node(self, node_id, url, title):
+        if not self.conn: return
         node_obj = {"id": node_id, "url": url, "title": title}
-        async with aiosqlite.connect(self.db_path) as conn:
-            await conn.execute("INSERT OR IGNORE INTO nodes (id, data) VALUES (?, ?)", (node_id, json.dumps(node_obj)))
-            await conn.commit()
+        await self.conn.execute("INSERT OR IGNORE INTO nodes (id, data) VALUES (?, ?)", (node_id, json.dumps(node_obj)))
+        await self.conn.commit()
         
     @log_result
     async def add_edge(self, source, target, label, context="content"):
-        async with aiosqlite.connect(self.db_path) as conn:
-            await conn.execute("INSERT OR IGNORE INTO edges (source, target, label, context) VALUES (?, ?, ?, ?)", (source, target, label, context))
-            await conn.commit()
+        if not self.conn: return
+        await self.conn.execute("INSERT OR IGNORE INTO edges (source, target, label, context) VALUES (?, ?, ?, ?)", (source, target, label, context))
+        await self.conn.commit()
             
     @log_result
     async def _get_node_by_id(self, node_id):
-        async with aiosqlite.connect(self.db_path) as conn:
-            async with conn.execute("SELECT data FROM nodes WHERE id = ?", (node_id,)) as cur:
-                row = await cur.fetchone()
-                if row:
-                    return json.loads(row[0])
+        if not self.conn: return None
+        async with self.conn.execute("SELECT data FROM nodes WHERE id = ?", (node_id,)) as cur:
+            row = await cur.fetchone()
+            if row:
+                return json.loads(row[0])
         return None
 
     @log_result

@@ -4,6 +4,7 @@ from urllib.parse import urlparse, urljoin, urldefrag
 from utils import get_state_hash
 from function_logger import log_result
 from contextlib import suppress
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError, Error as PlaywrightError
 
 @log_result
 async def perform_human_action(page):
@@ -132,5 +133,9 @@ async def process_page(engine, page, url, depth, source_id, action, context="con
                 
     except asyncio.TimeoutError:
         print(f"Timeout on {url}, Skipping")
+    except PlaywrightTimeoutError:
+        print(f"Playwright Timeout on {url}, Skipping")
+    except PlaywrightError as pe:
+        print(f"Playwright Engine Error processing {url}: {pe}")
     except Exception as e:
         print(f"Failed to process {url}:{e}")
