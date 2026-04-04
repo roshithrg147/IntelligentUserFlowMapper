@@ -37,8 +37,8 @@ async def attempt_login(page, start_url, username, password):
         return
 
     try:
-        from playwright_stealth import stealth
-        await stealth(page)
+        from playwright_stealth import Stealth
+        await Stealth().apply_stealth_async(page)
         print("Attempting authentication...")
         await page.goto(start_url, wait_until="domcontentloaded", timeout=10000)
         await perform_human_action(page)
@@ -56,8 +56,8 @@ async def process_page(engine, page, url, depth, source_id, action, context="con
     try:
         # Import stealth here to handle potential import errors in headless environments
         with suppress(ImportError):
-            from playwright_stealth import stealth
-            await stealth(page)
+            from playwright_stealth import Stealth
+            await Stealth().apply_stealth_async(page)
             
         parsed_url = urlparse(url)
         if parsed_url.netloc != engine.base_domain:

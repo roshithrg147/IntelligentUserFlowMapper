@@ -73,8 +73,8 @@ async def get_ui_snapshot(url: str) -> str:
     context = await browser.new_context()
     page = await context.new_page()
     with suppress(ImportError):
-        from playwright_stealth import stealth
-        await stealth(page)
+        from playwright_stealth import Stealth
+        await Stealth().apply_stealth_async(page)
     try:
         await page.goto(url, wait_until="networkidle")
         screenshot_bytes = await page.screenshot(full_page=True, type="jpeg", quality=60)
@@ -90,8 +90,8 @@ async def extract_form_schema(url: str) -> str:
     context = await browser.new_context()
     page = await context.new_page()
     with suppress(ImportError):
-        from playwright_stealth import stealth
-        await stealth(page)
+        from playwright_stealth import Stealth
+        await Stealth().apply_stealth_async(page)
     try:
         await page.goto(url, wait_until="domcontentloaded")
         schema = await page.evaluate('''() => {
@@ -117,8 +117,8 @@ async def execute_ui_action(url: str, target_element_text: str, action: str = "c
     context = await browser.new_context()
     page = await context.new_page()
     with suppress(ImportError):
-        from playwright_stealth import stealth
-        await stealth(page)
+        from playwright_stealth import Stealth
+        await Stealth().apply_stealth_async(page)
     try:
         await page.goto(url, wait_until="domcontentloaded")
         if input_text and action == "fill":
@@ -143,8 +143,8 @@ async def test_user_journey(start_url: str, target_button_sequence: list[str]) -
     context = await browser.new_context()
     page = await context.new_page()
     with suppress(ImportError):
-        from playwright_stealth import stealth
-        await stealth(page)
+        from playwright_stealth import Stealth
+        await Stealth().apply_stealth_async(page)
     try:
         await page.goto(start_url, wait_until="domcontentloaded")
         history = []
@@ -168,8 +168,8 @@ async def get_auth_cookies(login_url: str, username: str, password: str) -> str:
     context = await browser.new_context()
     page = await context.new_page()
     with suppress(ImportError):
-        from playwright_stealth import stealth
-        await stealth(page)
+        from playwright_stealth import Stealth
+        await Stealth().apply_stealth_async(page)
     try:
         await attempt_login(page, login_url, username, password)
         cookies = await context.cookies()
