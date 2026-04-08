@@ -1,155 +1,111 @@
-# Intelligent User Flow Mapper
+# Intelligent User Flow Mapper (Enterprise Edition)
 
-## 1. Project Overview & Features
+[![CI/CD Pipeline](https://github.com/roshithrg147/IntelligentUserFlowMapper/actions/workflows/ci.yml/badge.svg)](https://github.com/roshithrg147/IntelligentUserFlowMapper/actions)
+[![Production Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)](https://user-flow-mapper-692503525427.us-central1.run.app/health/ready)
 
-**Overview**: The Intelligent User Flow Mapper is a smart, asynchronous backend crawler designed to dynamically explore and produce structural representations of web applications. It maps a website's layout, intelligently filters out global navigation noise, and extracts the most meaningful, human-like linear user journeys into a UI-ready JSON format.
-
-**Key Features**:
-
-- **High-Performance Concurrency**: Built on `asyncio` and Playwright, utilizing an asynchronous worker-pool to process pages concurrently without blocking the event loop.
-- **Structural DOM-Aware Noise Reduction**: Intelligently differentiates between structural noise (links in `<nav>`, `<header>`, `<footer>`) and meaningful content interactions (`<main>`, `<body>`).
-- **Robust State Deduplication**: Eliminates redundancies by using robust DOM-element hashing (SHA-256) instead of naive URL matching, securely identifying unique application states like modals or SPAs.
-- **Priority-Weighted Beam Search**: Extracts human-readable user flows by assigning weighted traversal priorities, prioritizing actionable pathways over generic interlinking.
+**Intelligent User Flow Mapper** is a production-grade, asynchronous UI discovery engine. It intelligently explores web applications, bypasses navigation noise, and extracts meaningful user journeys into structured, AI-ready graph data.
 
 ---
 
-## 2. Installation & Quick Start
+## 🚀 Key Enterprise Features
 
-### Prerequisites
+- **Model Context Protocol (MCP) Support**: Seamlessly integrates with AI agents (Claude, GPT-4) as a high-fidelity web exploration tool.
+- **Production-Grade Concurrency**: Reuses global browser processes with isolated contexts to maximize throughput while minimizing resource overhead.
+- **Enterprise Security**:
+    - **API Key Authentication**: Protects endpoints with `X-API-KEY` header validation.
+    - **Configurable CORS**: Restricted to trusted origins for secure browser-based interactions.
+    - **Secret Redaction**: Automatic masking of passwords, tokens, and keys in logs.
+- **Deep Observability**:
+    - **Structured JSON Logging**: Powered by `structlog` for easy ingestion into ELK, CloudWatch, or Google Cloud Logging.
+    - **Prometheus Metrics**: Real-time tracking of active contexts, crawl duration, and failure rates via `/metrics`.
+    - **Health Monitoring**: Native `/health/live` and `/health/ready` endpoints for container orchestration.
+- **Cloud-Native Deployment**: Optimized Docker multi-stage builds and ready-to-use Cloud Run configurations.
+- **Automated Lifecycle Management**: Background workers handle the cleanup of session-specific SQLite state databases to prevent disk exhaustion.
 
-- Python 3.9+
-- Node.js (Optional, depending on Playwright system dependencies)
+---
 
-### Setup Instructions
+## 🛠️ Architecture & Core Modules
 
-1. **Create and activate a virtual environment**:
+The system is built on a non-blocking `asyncio` worker-pool architecture:
 
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-   ```
+- **`mcp_server.py`**: The high-performance entry point. Manages the global Playwright lifecycle, SSE transport, and security middleware.
+- **`main.py`**: The `CrawlerEngine` orchestrator. Manages worker tasks, state discovery, and session-specific graph isolation.
+- **`crawler_actions.py`**: Handles complex page interactions, stealth navigation, human-like behavior, and network resource interception.
+- **`model.py`**: High-performance graph management using `aiosqlite` for persistent state and **Priority-Weighted Beam Search** for flow extraction.
+- **`telemetry.py`**: Centralized hub for structured logging and Prometheus metrics.
 
-2. **Install project requirements**:
+---
 
+## 📦 Installation & Deployment
+
+### Local Development
+
+1. **Install Dependencies**:
    ```bash
    pip install -r requirements.txt
-   ```
-
-3. **Install Playwright browsers**:
-   This crawler requires Chromium to be installed via Playwright for headless execution. Execute this strictly _after_ `pip install -r requirements.txt` has successfully installed the Playwright Python package.
-
-   ```bash
    playwright install chromium
    ```
 
-4. **Run the Crawler**:
+2. **Run Local Server**:
    ```bash
-   python main.py
+   export API_KEY="your-secret-key"
+   python mcp_server.py
    ```
-   The crawler will execute and output the final graph topology to `results/user_flow.json`.
+
+### Production Deployment (Google Cloud Run)
+
+The application is optimized for Google Cloud Run. Deployment is automated via GitHub Actions, but can be done manually:
+
+```bash
+gcloud run deploy user-flow-mapper \
+  --image us-central1-docker.pkg.dev/[PROJECT_ID]/user-flow-mapper/user-flow-mapper:latest \
+  --memory 2Gi \
+  --set-env-vars API_KEY="your-secret",ALLOWED_ORIGINS="https://your-ui.com"
+```
 
 ---
 
-## 3. Core Architectural Modules (How It Works)
+## 🤖 Available MCP Tools
 
-The architecture strictly adheres to the **Single Responsibility Principle (SRP)**, decoupling orchestration, execution, state management, and serialization.
+When connected as an MCP server, the following tools are available to AI agents:
 
-- **`main.py`**: The central orchestrator. It manages the async event loop, initializes the `asyncio.Queue`, and controls the concurrency worker pool. It guarantees bounded concurrency and safe shutdown sequences. The `asyncio.Queue` dynamically feeds dedicated Playwright worker contexts to enforce a purely non-blocking I/O model.
-
-  _[Insert Diagram: Asynchronous Worker Pool Architecture here]_
-
-- **`crawler_actions.py`**: Handles all Playwright page interactions. This module intercepts network requests (aborting massive assets like images/media for speed), structurally assesses the DOM (tracing element ancestry), and enqueues newly discovered URL targets.
-- **`model.py`**: Manages the application graph topology (`GraphManager`). Uses $O(1)$ hash maps (`_nodes_dict`) and sets (`_edges_set`) to prevent $O(N^2)$ scaling bottlenecks during deduplication. Also houses the complex Beam Search algorithm responsible for flow extraction.
-- **`utils.py`**: Contains the highly resilient `get_state_hash` algorithm responsible for fingerprinting SPA layouts.
-- **`function_logger.py`**: A custom asynchronous logging decorator ensuring safe, metadata-aware telemetry execution logging without risking JSON/OOM stringification corruptions.
-- **`graph_serializer.py`**: Explicitly isolates Pydantic V2 JSON serialization to format the final graph into strict, UI-compliant JSON outputs.
+- `map_user_flows`: Recursively maps UI flows for any URL.
+- `get_ui_snapshot`: Returns a high-quality Base64 full-page screenshot.
+- `extract_form_schema`: Discovers forms, inputs, and validation rules.
+- `execute_ui_action`: Performs clicks or text input on specific UI elements.
+- `test_user_journey`: Verifies a sequence of actions (e.g., checkout flow).
+- `get_auth_cookies`: Automates login and retrieves session state.
 
 ---
 
-## 4. Key Engineering Decisions
+## 📊 Monitoring & Health
 
-### State Identification vs. URL Matching
-
-**Problem**: Modern Web Apps (SPAs) and complex sites often change their visual state without changing their URL (e.g., opening a modal, manipulating a React component). Conversely, they might change URLs with trailing generic tracking parameters while keeping the visual state identical.
-**Solution**: We utilize a `get_state_hash` approach over raw URL mapping. We inject JavaScript into the Playwright context to extract the tags, IDs, attributes, and text of strictly interactive elements (`<button>`, `<a>`, `<input>`). We sort this data structure to ensure deterministic output, then generate a SHA-256 hash. This groups fundamentally identical layout states together, regardless of URL parameter drift.
-
-### Noise Reduction: Structural Awareness over Statistical Guessing
-
-**Problem**: Traditional heuristic crawlers detect "Global Navigation" by statistical frequency (identifying a link as noise if it appears on >80% of pages). On highly dense corporate sites with "Mega-Menus", this aggressive heuristic systematically destroys completely valid content links.
-**Solution**: We employ **DOM Ancestry Mapping**. When `crawler_actions.py` evaluates the DOM, it uses JavaScript's `element.closest('nav, header, footer, .navigation, .menu')` to geometrically map a link.
-Instead of discarding navigation links, we tag the edge with a schema context of `"nav"` or `"content"`. We maintain the complete connectivity graph but classify it appropriately for delayed pruning algorithms.
-
-### Smart Flow Extraction (Beam Search)
-
-**Problem**: Using a Naive Depth-First Search (DFS) on highly interconnected, non-trivial enterprise websites inevitably leads to an exponential path explosion and cyclic stack overflows.
-**Solution**: We programmed a **Priority-Based Bounded Beam Search** inside `model.py`. The algorithm extracts "human-like" linear user flows by dynamically assigning traversal weights:
-
-- Interacting with a `"nav"` context gets a heavy penalty (`weight = 10`).
-- Interacting with standard `"content"` gets a standard priority (`weight = 5`).
-- Actionable, structural progression labels (e.g., `"submit"`, `"login"`, `"checkout"`, `"register"`) are highly prioritized (`weight = 1` or `2`).
-
-This guarantees that the Beam Search naturally gravitates towards and surfaces the most meaningful interactive user journeys (e.g., `Home Page -> Product Listing -> Add to Cart -> Checkout`) rather than tracing a route directly into a generic footer directory.
+- **Live Probe**: `GET /health/live` (Returns 200 if the process is running)
+- **Ready Probe**: `GET /health/ready` (Returns 200 if the browser instance is connected)
+- **Metrics**: `GET /metrics` (Prometheus format)
 
 ---
 
-## 5. Output Format
+## 🛡️ Security Configuration
 
-The `graph_serializer.py` strictly complies with frontend UI requirements, cleanly projecting the `flows` array at the top level of the JSON body.
+The server expects the following environment variables:
+- `API_KEY`: A secret string for authenticating tool requests.
+- `ALLOWED_ORIGINS`: Comma-separated list of allowed CORS origins.
+- `CRAWLER_USERNAME` / `CRAWLER_PASSWORD`: Default credentials for authenticated crawls.
 
-**Sample Output Structure (`results/user_flow.json`)**:
+---
+
+## 📝 Output Format
+
+Results are generated in a UI-ready JSON format, including a list of extracted **Flows**, the full **Node** map, and interactive **Edges**.
 
 ```json
 {
   "start_url": "https://example.com",
   "flows": [
-    {
-      "name": "Flow 1",
-      "steps": [
-        "Home Page",
-        "Product Catalog",
-        "Add to Cart",
-        "Secure Checkout"
-      ]
-    },
-    {
-      "name": "Flow 2",
-      "steps": ["Home Page", "Login Portal"]
-    }
+    { "name": "Flow 1", "steps": ["Home", "Products", "Checkout"] }
   ],
-  "nodes": [
-    {
-      "id": "8e81f824e...",
-      "url": "https://example.com",
-      "title": "Home Page"
-    }
-  ],
-  "edges": [
-    {
-      "source": "8e81f824e...",
-      "target": "362057311...",
-      "label": "Login",
-      "context": "nav"
-    }
-  ]
+  "nodes": [...],
+  "edges": [...]
 }
 ```
-
-## 🤖 MCP Server & Agentic UI Tools
-
-This crawler can now be run as a **Model Context Protocol (MCP)** Server! By running the server, you can give any AI agent (like Claude Desktop or custom UIs) direct access to crawl, map, and interact with web applications autonomously.
-
-### Available MCP Tools
-1. `map_user_flows`: Crawls a web app and maps UI flows.
-2. `get_ui_snapshot`: Takes a full-page screenshot and returns Base64.
-3. `extract_form_schema`: Maps all forms and input fields.
-4. `execute_ui_action`: Clicks or fills specific UI elements.
-5. `test_user_journey`: Tests a sequence of UI actions.
-6. `get_auth_cookies`: Automates login and harvests cookies.
-
-### Running the Server
-```bash
-pip install -r requirements.txt mcp starlette uvicorn httpx playwright
-playwright install
-python mcp_server.py
-```
-The server will start on `http://0.0.0.0:8000/sse`.
