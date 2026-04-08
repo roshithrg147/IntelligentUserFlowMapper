@@ -12,3 +12,4 @@ httpx
 aiosqlite
 structlog
 prometheus_client
+pytest-asyncio
