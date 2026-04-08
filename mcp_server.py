@@ -4,10 +4,14 @@ import asyncio
 import base64
 import uvicorn
 import logging
+import time
 from contextlib import asynccontextmanager
 from mcp.server.fastmcp import FastMCP
 from starlette.applications import Starlette
 from starlette.middleware.cors import CORSMiddleware
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError, Error as PlaywrightError
 from contextlib import suppress
 
@@ -16,7 +20,7 @@ from main import CrawlerEngine
 from crawler_actions import attempt_login
 from config import settings
 
-logger = logging.getLogger("CrawlerLogger")
+from telemetry import logger, MAPPING_DURATION, ACTIVE_BROWSER_CONTEXTS
 
 # Global browser state for connection pooling
 browser_state = {
@@ -30,12 +34,38 @@ async def lifespan(app: Starlette):
     logger.info("Initializing global browser instance...")
     browser_state["playwright"] = await async_playwright().start()
     browser_state["browser"] = await browser_state["playwright"].chromium.launch(headless=True)
+    
+    cleanup_task = asyncio.create_task(cleanup_worker())
+    
     yield
+    
     logger.info("Shutting down global browser instance...")
+    cleanup_task.cancel()
     if browser_state["browser"]:
         await browser_state["browser"].close()
     if browser_state["playwright"]:
         await browser_state["playwright"].stop()
+
+async def cleanup_worker():
+    """Periodically scans for and deletes old SQLite session databases."""
+    while True:
+        try:
+            db_dir = os.path.dirname(settings.sqlite_db_path)
+            if os.path.exists(db_dir):
+                current_time = time.time()
+                for filename in os.listdir(db_dir):
+                    if filename.startswith("nodes_") and filename.endswith(".db"):
+                        filepath = os.path.join(db_dir, filename)
+                        # Delete if older than 24 hours (86400 seconds)
+                        if current_time - os.path.getmtime(filepath) > 86400:
+                            os.remove(filepath)
+                            logger.info(f"Deleted old session DB: {filename}")
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            logger.error(f"Cleanup worker error: {e}")
+        
+        await asyncio.sleep(3600)  # Check every hour
 
 # 1. Initialize FastMCP
 mcp = FastMCP("UI-Flow-Mapper-Pro")
@@ -60,10 +90,15 @@ async def get_browser():
 async def map_user_flows(url: str, max_depth: int = 3, max_pages: int = 15) -> str:
     """Crawls a web application and maps its UI user flows."""
     import uuid
+    from urllib.parse import urlparse
     session_id = str(uuid.uuid4())
-    print(f"Starting crawl for {url} with session {session_id}...")
-    crawler = CrawlerEngine(url, max_dep=max_depth, max_pages=max_pages, session_id=session_id)
-    graph_data = await crawler.run()
+    logger.info("Starting crawl", url=url, session_id=session_id)
+    browser = await get_browser()
+    crawler = CrawlerEngine(url, max_dep=max_depth, max_pages=max_pages, session_id=session_id, browser=browser)
+    
+    with MAPPING_DURATION.labels(domain=urlparse(url).netloc).time():
+        graph_data = await crawler.run()
+        
     return graph_data.model_dump_json()
 
 @mcp.tool()
@@ -179,13 +214,52 @@ async def get_auth_cookies(login_url: str, username: str, password: str) -> str:
 
 # 2. Wrap in Starlette for SSE transport
 app = Starlette(debug=True, lifespan=lifespan)
+
+origins = [o.strip() for o in settings.allowed_origins.split(",") if o.strip()] if settings.allowed_origins else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class APIKeyMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if not settings.api_key:
+            return await call_next(request)
+            
+        api_key = request.headers.get("X-API-KEY")
+        if not api_key:
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                api_key = auth_header.split(" ")[1]
+                
+        if not api_key or api_key != settings.api_key.get_secret_value():
+            return JSONResponse({"detail": "Unauthorized. Invalid or missing API Key."}, status_code=401)
+            
+        return await call_next(request)
+
+app.add_middleware(APIKeyMiddleware)
+
+from starlette.responses import JSONResponse, Response
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+
+async def health_live(request):
+    return JSONResponse({"status": "ok"})
+    
+async def health_ready(request):
+    if browser_state["browser"] and browser_state["browser"].is_connected():
+        return JSONResponse({"status": "ready"})
+    return JSONResponse({"status": "browser_offline"}, status_code=503)
+
+async def metrics_endpoint(request):
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+app.add_route("/health/live", health_live)
+app.add_route("/health/ready", health_ready)
+app.add_route("/metrics", metrics_endpoint)
 
 app.mount("/", mcp.sse_app())
 

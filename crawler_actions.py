@@ -6,6 +6,8 @@ from function_logger import log_result
 from contextlib import suppress
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError, Error as PlaywrightError
 
+from telemetry import logger
+
 @log_result
 async def perform_human_action(page):
     """Adds human-like behavior: randomized delay and mouse movements/scroll."""
@@ -27,7 +29,7 @@ async def setup_interception(page):
                 case _:
                     await route.continue_()
         except Exception as e:
-            print(f"Network abort failed: {e}")
+            logger.error("Network abort failed", error=str(e))
     await page.route("**/*", intercept)
 
 @log_result
@@ -39,16 +41,16 @@ async def attempt_login(page, start_url, username, password):
     try:
         from playwright_stealth import Stealth
         await Stealth().apply_stealth_async(page)
-        print("Attempting authentication...")
+        logger.info("Attempting authentication...", url=start_url)
         await page.goto(start_url, wait_until="domcontentloaded", timeout=10000)
         await perform_human_action(page)
         await page.fill("input[type='email'], input[name*='user']", username, timeout=3000)
         await page.fill("input[type='password'], input[name*='pass']", password, timeout=3000)
         await page.click("button[type='submit'], input[type='submit'], [role='button']:has-text('Log in')")
         await page.wait_for_load_state("networkidle", timeout=5000)
-        print("Authentication attempt finished.")
+        logger.info("Authentication attempt finished")
     except Exception as e:
-        print(f"Authentication failed or no login form found: {e}")
+        logger.error("Authentication failed or no login form found", error=str(e))
 
 @log_result
 async def process_page(engine, page, url, depth, source_id, action, context="content"):
@@ -61,7 +63,7 @@ async def process_page(engine, page, url, depth, source_id, action, context="con
             
         parsed_url = urlparse(url)
         if parsed_url.netloc != engine.base_domain:
-            print(f"Blocking external jump to: {url}")
+            logger.info("Blocking external jump", url=url)
             return
         # Stripping params isn't strict here, but we check ending types.
         match url.lower().split('.')[-1]:
@@ -70,7 +72,7 @@ async def process_page(engine, page, url, depth, source_id, action, context="con
             case _:
                 pass
         
-        print(f"Exploring: {url}, (Depth:{depth})")
+        logger.debug("Exploring page", url=url, depth=depth, session_id=engine.session_id)
         response = await page.goto(url, wait_until="domcontentloaded", timeout=6000)
         if response and response.status in [403, 429]:
             raise Exception(f"RateLimitException: {response.status}")
@@ -132,10 +134,10 @@ async def process_page(engine, page, url, depth, source_id, action, context="con
                     await engine.enqueue(abs_url, depth + 1, current_state_id, text, next_context)
                 
     except asyncio.TimeoutError:
-        print(f"Timeout on {url}, Skipping")
+        logger.warning("Timeout skipping", url=url, session_id=engine.session_id)
     except PlaywrightTimeoutError:
-        print(f"Playwright Timeout on {url}, Skipping")
+        logger.warning("Playwright timeout skipping", url=url, session_id=engine.session_id)
     except PlaywrightError as pe:
-        print(f"Playwright Engine Error processing {url}: {pe}")
+        logger.error("Playwright Engine Error", url=url, error=str(pe), session_id=engine.session_id)
     except Exception as e:
-        print(f"Failed to process {url}:{e}")
+        logger.error("Failed to process page", url=url, error=str(e), session_id=engine.session_id)

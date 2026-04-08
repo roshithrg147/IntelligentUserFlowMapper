@@ -42,7 +42,28 @@ class GraphManager:
             self.db_path = settings.sqlite_db_path
         self._edges_set = set()
         self.conn = None
+        self.db_queue = asyncio.Queue()
+        self.writer_task = None
         
+    async def _db_writer(self):
+        while True:
+            try:
+                op = await self.db_queue.get()
+                if op is None:
+                    self.db_queue.task_done()
+                    break
+                query, args = op
+                if self.conn:
+                    await self.conn.execute(query, args)
+                    await self.conn.commit()
+                self.db_queue.task_done()
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                import logging
+                logging.exception(f"DB Writer error: {e}")
+                self.db_queue.task_done()
+
     async def init_db(self):
         # Create results directory if it doesn't exist
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
@@ -52,18 +73,25 @@ class GraphManager:
         await self.conn.execute('''CREATE TABLE IF NOT EXISTS edges
                         (source TEXT, target TEXT, label TEXT, context TEXT, PRIMARY KEY (source, target, label, context))''')
         await self.conn.commit()
+        self.writer_task = asyncio.create_task(self._db_writer())
 
     async def close(self):
+        if self.writer_task:
+            await self.db_queue.put(None)
+            await self.writer_task
+            self.writer_task = None
         if self.conn:
             await self.conn.close()
             self.conn = None        
     async def get_all_nodes(self):
+        await self.db_queue.join()
         if not self.conn: return []
         async with self.conn.execute("SELECT data FROM nodes") as cur:
             rows = await cur.fetchall()
             return [json.loads(row[0]) for row in rows]
 
     async def get_all_edges(self):
+        await self.db_queue.join()
         if not self.conn: return []
         async with self.conn.execute("SELECT source, target, label, context FROM edges") as cur:
             rows = await cur.fetchall()
@@ -77,16 +105,17 @@ class GraphManager:
     async def add_node(self, node_id, url, title):
         if not self.conn: return
         node_obj = {"id": node_id, "url": url, "title": title}
-        await self.conn.execute("INSERT OR IGNORE INTO nodes (id, data) VALUES (?, ?)", (node_id, json.dumps(node_obj)))
+        await self.db_queue.put(("INSERT OR IGNORE INTO nodes (id, data) VALUES (?, ?)", (node_id, json.dumps(node_obj))))
         
         
     @log_result
     async def add_edge(self, source, target, label, context="content"):
         if not self.conn: return
-        await self.conn.execute("INSERT OR IGNORE INTO edges (source, target, label, context) VALUES (?, ?, ?, ?)", (source, target, label, context))
+        await self.db_queue.put(("INSERT OR IGNORE INTO edges (source, target, label, context) VALUES (?, ?, ?, ?)", (source, target, label, context)))
             
     @log_result
     async def _get_node_by_id(self, node_id):
+        await self.db_queue.join()
         if not self.conn: return None
         async with self.conn.execute("SELECT data FROM nodes WHERE id = ?", (node_id,)) as cur:
             row = await cur.fetchone()

@@ -10,3 +10,5 @@ starlette
 uvicorn
 httpx
 aiosqlite
+structlog
+prometheus_client

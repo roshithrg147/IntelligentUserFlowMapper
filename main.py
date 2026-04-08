@@ -11,9 +11,10 @@ from utils import get_state_hash, get_state_hash_sync, save_result
 from model import GraphManager
 from crawler_actions import setup_interception, attempt_login, process_page
 from graph_serializer import serialize_graph_to_disk
+from telemetry import logger, ACTIVE_BROWSER_CONTEXTS, FAILURE_RATE
 
 class CrawlerEngine:
-    def __init__(self, start_url, max_dep=3, max_pages=50, username=None, password=None, session_id=None):
+    def __init__(self, start_url, max_dep=3, max_pages=50, username=None, password=None, session_id=None, browser=None):
         self.start_url = start_url
         self.max_dep = max_dep
         self.max_pages = max_pages
@@ -21,6 +22,8 @@ class CrawlerEngine:
         self.username = username or (settings.crawler_username.get_secret_value() if settings.crawler_username else None)
         self.password = password or (settings.crawler_password.get_secret_value() if settings.crawler_password else None)
         self.base_domain = urlparse(start_url).netloc
+        self.shared_browser = browser
+        self.session_id = session_id or "local_test"
         
         self.graph = GraphManager(session_id=session_id)
         
@@ -73,16 +76,16 @@ class CrawlerEngine:
                     continue
                 
                 q_size = self.queue.qsize()
-                print(f"----Progress: [Queue: {q_size}] | States Mapped: {v_size}----")
+                logger.info("Worker mapping progress", queue=q_size, states_mapped=v_size, session_id=self.session_id)
                 if depth > self.max_dep:
                     continue
                     
                 await process_page(self, page, url, depth, source_id, action, context_tag)
             except Exception as e:
-                import logging
-                logging.exception(f"Worker error processing {url}")
+                logger.error("Worker error processing", url=url, session_id=self.session_id, exc_info=True)
+                FAILURE_RATE.labels(domain=self.base_domain, error_type=type(e).__name__).inc()
                 if "RateLimitException" in str(e):
-                    print("Rate limit detected! Delaying worker.")
+                    logger.warning("Rate limit detected! Delaying worker.", session_id=self.session_id)
                     await asyncio.sleep(60)
             finally:
                 self.queue.task_done()
@@ -107,8 +110,17 @@ class CrawlerEngine:
                 self.queue.task_done()
             await self.enqueue(self.start_url, 0, None, "Start", "content")
             
-            async with async_playwright() as p:
+            if self.shared_browser:
+                browser = self.shared_browser
+                p = None
+                own_browser = False
+            else:
+                p = await async_playwright().start()
                 browser = await p.chromium.launch(headless=True)
+                own_browser = True
+
+            try:
+                ACTIVE_BROWSER_CONTEXTS.inc()
                 context = await browser.new_context(viewport={'width':1280, 'height': 720})
                 page = await context.new_page()
                 
@@ -127,12 +139,16 @@ class CrawlerEngine:
                 for w in workers:
                     w.cancel()
                     
-                await browser.close()
+            finally:
+                if own_browser:
+                    await browser.close()
+                    await p.stop()
+                ACTIVE_BROWSER_CONTEXTS.dec()
                 
-            print("Skipping global navigation pruning to rely on context-based pathfinding edges.")
+            logger.info("Skipping global navigation pruning to rely on context-based pathfinding edges.", session_id=self.session_id)
                 
             if self.root_state_id:
-                print("Extracting linear user flows...")
+                logger.info("Extracting linear user flows...", session_id=self.session_id)
                 await self.graph.extract_flows(self.root_state_id)
                 
             await self.graph.prepare_serialization()

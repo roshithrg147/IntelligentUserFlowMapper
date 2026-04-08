@@ -1,19 +1,34 @@
-# Use the official Playwright Python image
-FROM mcr.microsoft.com/playwright/python:v1.49.1-jammy
-
-# Set environment variables for non-interactive installs and production
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PORT=8080
+# Builder Stage
+FROM python:3.11-slim as builder
 
 WORKDIR /app
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy only requirements first to leverage Docker cache
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install dependencies and Chromium
-RUN pip install --no-cache-dir -r requirements.txt && \
-    playwright install --with-deps chromium
+# Final Stage
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PORT=8080
+ENV PATH="/opt/venv/bin:$PATH"
+
+WORKDIR /app
+
+# Copy the virtual environment from the builder stage
+COPY --from=builder /opt/venv /opt/venv
+
+# Install system dependencies required for Chromium cleanly
+RUN apt-get update && \
+    playwright install --with-deps chromium && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy the rest of the application code
 COPY . .
